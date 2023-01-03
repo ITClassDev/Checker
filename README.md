@@ -11,13 +11,13 @@ tests.json = [ </br>
     {"input": "1 0 0 0\n10 0 0 0", "output": "91"}  </br>
 ] </br>
 env.json = [ </br>
-    {"compiler": "g" or "py", "limit": "4", "memory":"64", "code":" #include <iostream> </br>
-                                                                    int main(){    </br> 
-                                                                        return 0; </br>
+    {"compiler": "g" or "py", "limit": "4", "memory":"64", "code":" #include <iostream> 
+                                                                    int main(){    
+                                                                        return 0; 
                                                                     } "                 }</br>
 ]</br>
 
-Результат работы:
-results.json = [
-        {"result":"OK" or "WA" or "RT" or "PE" or "CE", "output": " 0 0 0 1259 123", "error": "" or "could not find definition for X ..."}
-]
+Результат работы:</br>
+results.json = [</br>
+        {"result":"OK" or "WA" or "RT" or "PE" or "CE", "output": " 0 0 0 1259 123", "error": "" or "could not find definition for X ..."}</br>
+]</br>
