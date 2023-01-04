@@ -36,5 +36,5 @@ itc_word.json = [ </br>
 
 Файлы подгружаются из github репозитория при указании ссылки</br>
 env.json = [ </br>
-    {"compiler": "g" or "py", "limit": "4", "memory":"64", "code":"" ,"link":"https://github.com/ITClassDev/Checker/edit/master/README.md"}</br>
+    {"compiler": "g" or "py", "limit": "4", "memory":"64", "code":"" ,"link":"https://github.com/ITClassDev/"}</br>
 ]</br>
