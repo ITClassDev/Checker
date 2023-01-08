@@ -1,0 +1,5 @@
+CE
+check.cpp:7:16: ошибка: expected «;» before «return»
+      |                ^
+    8 |     return 0;
+make: *** [<встроенное>: check] Ошибка 1
