@@ -1,6 +1,5 @@
-# Мысли про реализации
-FrontEnd -> [SOLUTION] -> BackEnd -> Checker </br>
-Задача в чекере. Что чекер знает? </br>
+# Принцип работы 
+FrontEnd -> BackEnd -> Checker </br>
 
 <b>Одиночная задача:</b></br>
 main.cpp или через параметр в json - код решения </br>
