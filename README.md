@@ -6,11 +6,11 @@ main.cpp или через параметр в json - код решения </br
 tests.json - json с тестами </br>
 env.json - json c параметрами <br>
 ```
-tests.json = [
-    {"input": "1 0 0 0\n10 0 0 0", "output": "91"}
+tests.json = {
+    "tests":[{"input": "1 0 0 0\n10 0 0 0", "output": "91"}
     {"input": "1 97 0\n450 10 87", "output": "124"}
-    {"input": "1 345 0 0\n10 6423 0 234", "output": "90015"}
-] 
+    {"input": "1 345 0 0\n10 6423 0 234", "output": "90015"}]
+}
 env.json = [ 
     {"compiler": "g" or "py", "limit": "4", "memory":"64", "code":" #include <iostream> 
                                                                     int main(){    
