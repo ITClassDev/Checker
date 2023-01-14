@@ -31,9 +31,9 @@ results.json = [
 К каждой функции идут тесты,  имя списка совпадает с названием функции</br>
  ```
 tests.json = [ </br>
-   {"itc_len": [{"input": "1 0 0 0\n10 0 0 0", "output": "91"}
+   {"itc_len": {"tests": [{"input": "1 0 0 0\n10 0 0 0", "output": "91"}
                 {"input": "2 97 0\n450 10 87", "output": "124"}
-                {"input": "1 345 0 0\n10 6423 0 234", "output": "90015"}]}
+                {"input": "1 345 0 0\n10 6423 0 234", "output": "90015"}], "arguments": ["string"]}}
                 
    {"itc_max": [{"input": "1234 12345 1234 ", "output": "789"}
                 {"input": "8 97 0\n450 10 87", "output": "123"}
