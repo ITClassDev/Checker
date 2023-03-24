@@ -47,3 +47,10 @@ env.json = [
     {"type":"h", "compiler": "g" or "py", "limit": "4", "memory":"64", "code":"" , "link":"https://github.com/ITClassDev/"}
 ]
 ```
+Docker attaching
+Attach via websockets to process with pid 1:
+```
+docker run -itd --name=itc_python ubuntu:20.04 bash -i -c "bash -i" # Run container with bash
+socat -d -d TCP-L:2375,fork UNIX:/var/run/docker.sock # proxy docker socket to local tcp port 2375
+websocat "ws://127.0.0.1:2375/containers/4c45d07e9038/attach/ws?stream=1&stdout=1&stdin=1&logs=1" # run test websocket client to execute bash commands
+```
