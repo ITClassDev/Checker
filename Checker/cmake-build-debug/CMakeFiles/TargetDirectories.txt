@@ -1,3 +1,0 @@
-/home/frokes/CLionProjects/Checker/cmake-build-debug/CMakeFiles/Checker.dir
-/home/frokes/CLionProjects/Checker/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/frokes/CLionProjects/Checker/cmake-build-debug/CMakeFiles/rebuild_cache.dir
