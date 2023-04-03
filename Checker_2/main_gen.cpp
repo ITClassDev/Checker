@@ -69,7 +69,7 @@ string shtp_cpp_cli_run(string submission_id, string test){
 	string mount_to = "/home/code";
 	string image = "ubuntu:latest";
 	string entrypoint = "bash -c \"./home/code/main_" + submission_id + " <<< '" + test + "'\"";
-	string bash = "sudo docker run --network none -itd -v " + workspace_absolute_path + ":" + mount_to + " " + image + " " + entrypoint;
+	string bash = "docker run --network none -itd -v " + workspace_absolute_path + ":" + mount_to + " " + image + " " + entrypoint;
 	
 	string container_id_messy = exec(bash.c_str());
 	return container_id_messy.erase(container_id_messy.size()-1);
