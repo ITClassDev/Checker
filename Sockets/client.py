@@ -16,6 +16,7 @@ def listen(s):
             try:
                 data = json.loads(data.decode("utf-8"))
                 print("Response:", data)
+                s.close()
             except:
                 print("Invalid data")
 

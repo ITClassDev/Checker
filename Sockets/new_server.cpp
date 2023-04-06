@@ -52,34 +52,30 @@ string exec(const char *cmd){
 	pclose(pipe);
 	return result;
 } 
-string shtp_cli_run(string submission_id, string test, string entrypoint){
+string shtp_run(json env, string test, int submission_id){
 	string workspace_absolute_path = "./workspace/" + (string)submission_id;
 	string mount_to = "/home/code";
-	string image = "ubuntu:latest";
-	string entrypoint = "bash -c \"./home/code/main_" + submission_id + " <<< '" + test + "'\"";
+	string image = env["language"] + ":latest";
+    if (env["language"] == "python"){
+        string run_cmd = "python3 /home/code/main.py";
+    }
+	string entrypoint = fmt::v9::format("bash -c \"{} <<< \"{}\" \"")
 	//string entrypoint// = "bash -c /home/code/";
     string bash = "docker run --network none -itd -v " + workspace_absolute_path + ":" + mount_to + " " + image + " " + entrypoint;
 	string container_id_messy = exec(bash.c_str());
 	return container_id_messy.erase(container_id_messy.size()-1);
 }
 
-
-json test_one_func(json tests){
-	string func = tests["name"];
-	string submission_id = to_string(tests["submit_id"]);
-
-	ofstream main_file("./workspace/" + (string)submission_id + "/main_" + submission_id + ".cpp");
-	main_file << generate_test_main(tests);
-	main_file.close();
-	compile_cpp_header(submission_id);
+json test_single_task(json tests){
 	
-	json func_verdict = json::array();
+    //compile_cpp(submission_id);
+	json checker_verdict = json::array();
 	for(json::iterator test_it = tests["tests"].begin(); test_it != tests["tests"].end(); ++test_it){
 		json test = *test_it;
-		
+
 		string submission_container = shtp_cpp_cli_run(submission_id, test["input"]);
 		int status_code = wait_for_container(submission_container)["StatusCode"];
-	
+		
 		if(!status_code){
 			string output = get_container_logs(submission_container);
 			output = regex_replace(output, regex("\\r\\n"), "\n");
@@ -87,14 +83,24 @@ json test_one_func(json tests){
 				output = output.erase(output.size()-1);
 			}
 			string expected_output = test["output"];
-			func_verdict.push_back({{"status", output == expected_output}, {"stderr", ""}});
+			checker_verdict.push_back({{"status", output == expected_output}, {"stderr", ""}});
 		}
 		remove_container(submission_container);
 	}
-	return func_verdict;
+	return checker_verdict;
 }
 
-void check(){
+
+
+void check(json submit){
+    // Pipeline for single task checking
+    // Compile if C++
+    // Run test
+    if (submit["type"] == 0){
+        
+    }else if (submit["type"] == 1){
+
+    }
 }
 
 int main(){
@@ -102,6 +108,7 @@ int main(){
     struct sockaddr_in server, client;
     char client_message[4000];
     json res;
+    
     //char ans[6] = {"B", "U", "F", "F", "E", "R"};
 
 
