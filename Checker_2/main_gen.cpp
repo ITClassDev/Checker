@@ -51,19 +51,13 @@ string exec(const char *cmd){
 }
 
 
-void compile_cpp_header(string submission_id){
-	string bash = "g++ " + workspace_path + submission_id + "/main.cpp " + workspace_path + submission_id + "/func.cpp -o " + workspace_path + submission_id + "/main";
+void compile_cpp(string submission_id, bool header){
+	string bash = "g++ " + workspace_path + submission_id + "/main.cpp ";
+	if(header){
+		bash += workspace_path + submission_id + "/func.cpp ";
+	}
+	bash += "-o " + workspace_path + submission_id + "/main";
 	system(bash.c_str());
-
-}
-
-
-void compile_cpp(string submission_id){
-	string bash = "g++ " + workspace_path + submission_id + "/main.cpp -o " + workspace_path + submission_id + "/main";
-	system(bash.c_str());
-
-//	string compile_messy = exec(bash.c_str());
-//	return compile_messy;
 }
 
 
@@ -86,7 +80,7 @@ json test_one_func(json tests){
 	ofstream main_file(workspace_path + submission_id + "/main.cpp");
 	main_file << generate_test_main(tests);
 	main_file.close();
-	compile_cpp_header(submission_id);
+	compile_cpp(submission_id, 1);
 	
 	json func_verdict = json::array();
 	for(json::iterator test_it = tests["tests"].begin(); test_it != tests["tests"].end(); ++test_it){
@@ -105,6 +99,7 @@ json test_one_func(json tests){
 			func_verdict.push_back({{"status", output == expected_output}, {"stderr", ""}});
 		}else{
 			cout << "something went wrong during running\n";
+			remove_container(submission_container);
 			exit(0);
 		}
 		remove_container(submission_container);
@@ -127,7 +122,7 @@ json test_multi_funcs(json tests){
 
 json test_main(json tests){
 	string submission_id = to_string(tests["submit_id"]);
-	compile_cpp(submission_id);
+	compile_cpp(submission_id, 0);
 
 	json checker_verdict = json::array();
 	for(json::iterator test_it = tests["tests"].begin(); test_it != tests["tests"].end(); ++test_it){
@@ -146,6 +141,7 @@ json test_main(json tests){
 			checker_verdict.push_back({{"status", output == expected_output}, {"stderr", ""}});
 		}else{
 			cout << "something went wrong during running\n";
+			remove_container(submission_container);
 			exit(0);
 		}
 		remove_container(submission_container);
