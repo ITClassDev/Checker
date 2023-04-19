@@ -13,7 +13,6 @@
 using namespace std;
 using json = nlohmann::json;
 
-static string deafult_source_dir = "./source/";
 static string workspace_path = "./workspace/";
 
 string generate_test_main(json test){
@@ -29,18 +28,6 @@ string generate_test_main(json test){
 	}
 	base += "a" + to_string(test["types"].size()-1) + ");\n}";
 	return base;
-}
-
-
-void compile_cpp_header(string submission_id){
-	string bash = "g++ " + deafult_source_dir + "main_" + submission_id + ".cpp " + deafult_source_dir + "func.cpp -o " + workspace_path + "main_" + submission_id;
-	system(bash.c_str());
-}
-
-
-void compile_cpp(string submission_id){
-	string bash = "g++ " + deafult_source_dir + "main.cpp -o " + workspace_path + "main_" + submission_id;
-	system(bash.c_str());	
 }
 
 
@@ -61,14 +48,30 @@ string exec(const char *cmd){
 	}
 	pclose(pipe);
 	return result;
-} 
+}
+
+
+void compile_cpp_header(string submission_id){
+	string bash = "g++ " + workspace_path + submission_id + "/main.cpp " + workspace_path + submission_id + "/func.cpp -o " + workspace_path + submission_id + "/main";
+	system(bash.c_str());
+
+}
+
+
+void compile_cpp(string submission_id){
+	string bash = "g++ " + workspace_path + submission_id + "/main.cpp -o " + workspace_path + submission_id + "/main";
+	system(bash.c_str());
+
+//	string compile_messy = exec(bash.c_str());
+//	return compile_messy;
+}
 
 
 string shtp_cpp_cli_run(string submission_id, string test){
 	string workspace_absolute_path = "/home/iko/Desktop/proj/Checker/Checker_2/workspace/";
 	string mount_to = "/home/code";
 	string image = "ubuntu:latest";
-	string entrypoint = "bash -c \"./home/code/main_" + submission_id + " <<< '" + test + "'\"";
+	string entrypoint = "bash -c \"./home/code/" + submission_id + "/main <<< '" + test + "'\"";
 	string bash = "docker run --network none -itd -v " + workspace_absolute_path + ":" + mount_to + " " + image + " " + entrypoint;
 	
 	string container_id_messy = exec(bash.c_str());
@@ -80,7 +83,7 @@ json test_one_func(json tests){
 	string func = tests["name"];
 	string submission_id = to_string(tests["submit_id"]);
 
-	ofstream main_file(deafult_source_dir + "main_" + submission_id + ".cpp");
+	ofstream main_file(workspace_path + submission_id + "/main.cpp");
 	main_file << generate_test_main(tests);
 	main_file.close();
 	compile_cpp_header(submission_id);
@@ -100,6 +103,9 @@ json test_one_func(json tests){
 			}
 			string expected_output = test["output"];
 			func_verdict.push_back({{"status", output == expected_output}, {"stderr", ""}});
+		}else{
+			cout << "something went wrong during running\n";
+			exit(0);
 		}
 		remove_container(submission_container);
 	}
@@ -138,6 +144,9 @@ json test_main(json tests){
 			}
 			string expected_output = test["output"];
 			checker_verdict.push_back({{"status", output == expected_output}, {"stderr", ""}});
+		}else{
+			cout << "something went wrong during running\n";
+			exit(0);
 		}
 		remove_container(submission_container);
 	}
@@ -145,37 +154,43 @@ json test_main(json tests){
 }
 
 
-void init_workspace(){
-	string bash = "mkdir " + workspace_path;
+void init_workspace(string submission_id){
+	string bash = "mkdir " + workspace_path + submission_id + "/";
 	system(bash.c_str());
 }
 
 
-void clean_workspace(){
-	string bash = "rm -r " + workspace_path;
+void clean_workspace(string submission_id){
+	string bash = "rm -r " + workspace_path + submission_id + "/";
 	system(bash.c_str());
 }
 
 
-void copy_source(string source_dir){
-	if(source_dir != deafult_source_dir){
-		string bash = "cp -r " + source_dir + "* " + deafult_source_dir;
-		system(bash.c_str());
-	}
+//void copy_source(string source_dir){
+//	if(source_dir != deafult_source_dir){
+//		string bash = "cp -r " + source_dir + "* " + deafult_source_dir;
+//		system(bash.c_str());
+//	}
+//}
+
+void copy_source(string source_dir, string submission_id){
+	string bash = "cp -r " + source_dir + submission_id + "/* " + workspace_path + submission_id + "/";
+	system(bash.c_str());
 }
 
+//void clean_source(string source_dir){
+//	if(source_dir != deafult_source_dir){
+//		string bash = "rm -r " + deafult_source_dir;
+//		system(bash.c_str());
+//		bash = "mkdir " + deafult_source_dir;
+//		system(bash.c_str());
+//	}
+//}
 
-void clean_source(string source_dir){
-	if(source_dir != deafult_source_dir){
-		string bash = "rm -r " + deafult_source_dir;
-		system(bash.c_str());
-		bash = "mkdir " + deafult_source_dir;
-		system(bash.c_str());
-	}
-}
 
 // to run this shit g++ main_gen.cpp docker.cpp -lcurl -lfmt -o test && sudo ./test
 // change workspace absolute path on automatic at shtp cpp cli run
+// add error handler; merge with main.cpp; better header generator
 
 int main(){
 //	const json test_func_ex = {
@@ -212,17 +227,26 @@ int main(){
 	{"submit_id", 120}
 	};
 
-
+	clean_workspace("100");
+	init_workspace("100");
+	copy_source("./test_source/", "100");
 	
-	clean_workspace();
-	init_workspace();
-	clean_source("./test_source/");
-	copy_source("./test_source/");
+	clean_workspace("111");
+	init_workspace("111");
+	copy_source("./test_source/", "111");
+
+	clean_workspace("120");
+	init_workspace("120");
+	copy_source("./test_source/", "120");
+
+	//clean_source("./test_source/");
+	//copy_source("./test_source/");
 
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	json test_1 = test_main(main_test);
 	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 	cout << "test_1 time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]\n";
+
 	begin = std::chrono::steady_clock::now();
 	json test_2 = test_multi_funcs(header_test);
 	end = std::chrono::steady_clock::now();
