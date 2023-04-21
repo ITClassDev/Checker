@@ -90,7 +90,7 @@ class Checker:
         os.system(f"git clone {git_path} {fetch_path}")
         return fetch_path
 
-    def check_multiple_tasks(self, git_path, tests, callback, loop):
+    def check_multiple_tasks(self, git_path, tests):
         final_callback_data = {}
         source_path = self.fetch_git(git_path)
         with open(os.path.join(source_path, "header.h"), "rb") as header_fd:
@@ -141,8 +141,11 @@ class Checker:
                     final_callback_data[list(test_func.values())[0]["submit_id"]] = (
                         (tests_passed == len(test_set), tests_statuses))
                 else:
-                    callback(False, loop)
-                    return None
-        callback(final_callback_data, loop)  # send result data, to callback
+                    return {"status": False}
+                    
+        #callback(final_callback_data, loop)  # send result data, to callback
         shutil.rmtree(source_path)
+        return {"status": True, "tests": final_callback_data}
 
+if __name__ == "__main__":
+    pass
