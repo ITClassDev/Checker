@@ -22,9 +22,9 @@ def process_arg(arg_val, arg_type):
         arg_val = arg_val.replace('''"''', r'''\"''')
         return f"'{arg_val}'"
     elif "vector" in arg_type:
-        # 1D vector
-        i_type = arg_type.replace("vector", "").replace("<", "").replace(">", "").strip()
-        print(i_type)
+        # any count of dimensions support
+        dimensions = list(map(str.strip, arg_type.replace("vector", "").replace("<", "").replace(">", "").strip().split(",")))
+        print(dimensions)
         return "{1, 2}"
     
 
@@ -39,8 +39,7 @@ tests = [
     ], "arg_types": ["string", "char"]},
     {"name": "itc_sumlst", "tests": [
         {"input": "1 2 3 4 5 6 7 8", "output": "36"}
-    ], "arg_types": ["vector<int>"]}
-    
+    ], "arg_types": ["vector<int, int>"]}
 ]
 
 for func in tests:
