@@ -30,7 +30,7 @@ results.json = [
 
 К каждой функции идут тесты, лимиты и типы входа и выхода </br>
  ```
-tests.json = [ </br>
+tests.json = [
 {"name":"sum","tests":[
 	["input": "100\n120", "output": "220"],
 	["input": "20\n43", "output": "63"],
