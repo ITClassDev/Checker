@@ -2,21 +2,15 @@
 FrontEnd -> BackEnd -> Checker </br>
 
 <b>Одиночная задача:</b></br>
-main.cpp или через параметр в json - код решения </br>
 tests.json - json с тестами </br>
-env.json - json c параметрами <br>
 ```
 tests.json = {
-    "tests":[{"input": "1 0 0 0\n10 0 0 0", "output": "91"}
-    {"input": "1 97 0\n450 10 87", "output": "124"}
-    {"input": "1 345 0 0\n10 6423 0 234", "output": "90015"}]
-}
-env.json = [ 
-    {"compiler": "g" or "py", "limit": "4", "memory":"64", "code":" #include <iostream> 
-                                                                    int main(){    
-                                                                        return 0; 
-                                                                    } "  }
-]
+"tests":[
+	["input": "100\n50\n25", "output": "175\n1"],
+	["input": "1\n2\n3", "output": "6\n1"],
+	["input": "60\n30\n15", "output": "105\n1"]	],
+"submit_id": 120, "env": ["time": 2, "memory": 1024]
+};
 ```
 
 Результат работы:</br>
@@ -28,7 +22,7 @@ results.json = [
  ```
 <b>Задачи с .h файлами:</b></br>
 
-К каждой функции идут тесты, лимиты и типы входа и выхода </br>
+К каждой функции идут тесты, лимиты, типы входа и выхода </br>
  ```
 tests.json = [
 {"name":"sum","tests":[
