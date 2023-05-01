@@ -2,21 +2,15 @@
 FrontEnd -> BackEnd -> Checker </br>
 
 <b>Одиночная задача:</b></br>
-main.cpp или через параметр в json - код решения </br>
 tests.json - json с тестами </br>
-env.json - json c параметрами <br>
 ```
 tests.json = {
-    "tests":[{"input": "1 0 0 0\n10 0 0 0", "output": "91"}
-    {"input": "1 97 0\n450 10 87", "output": "124"}
-    {"input": "1 345 0 0\n10 6423 0 234", "output": "90015"}]
-}
-env.json = [ 
-    {"compiler": "g" or "py", "limit": "4", "memory":"64", "code":" #include <iostream> 
-                                                                    int main(){    
-                                                                        return 0; 
-                                                                    } "  }
-]
+"tests":[
+	["input": "100\n50\n25", "output": "175\n1"],
+	["input": "1\n2\n3", "output": "6\n1"],
+	["input": "60\n30\n15", "output": "105\n1"]	],
+"submit_id": 120, "env": ["time": 2, "memory": 1024]
+};
 ```
 
 Результат работы:</br>
@@ -28,16 +22,19 @@ results.json = [
  ```
 <b>Задачи с .h файлами:</b></br>
 
-К каждой функции идут тесты,  имя списка совпадает с названием функции</br>
+К каждой функции идут тесты, лимиты, типы входа и выхода </br>
  ```
-tests.json = [ </br>
-   {"itc_len": {"tests": [{"input": "1 0 0 0\n10 0 0 0", "output": "91"}
-                {"input": "2 97 0\n450 10 87", "output": "124"}
-                {"input": "1 345 0 0\n10 6423 0 234", "output": "90015"}], "arguments": ["string"]}}
-                
-   {"itc_max": [{"input": "1234 12345 1234 ", "output": "789"}
-                {"input": "8 97 0\n450 10 87", "output": "123"}
-                {"input": "1 345  0\n10 123 0 9752", "output": "345"}]}
+tests.json = [
+{"name":"sum","tests":[
+	["input": "100\n120", "output": "220"],
+	["input": "20\n43", "output": "63"],
+	["input": "7\n123", "output": "130"]	], 
+"submit_id": 100, "types": ["in": ["int", "int"], "out": "int"], "env": ["time": 2, "memory": 1024]},
+{"name":"str_list","tests":[
+	["input": "abcdef", "output": "a b c d e f "],
+	["input": "lokira", "output": "l o k i r a "],
+	["input": "pgsppl", "output": "p g s p p l "]	], 
+"submit_id": 105, "types": ["in": ["string"], "out": "vector<char>"], "env", ["time": 2, "memory": 1024]}
 ]
 ```
 
