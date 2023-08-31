@@ -12,14 +12,6 @@ tests.json = {
 "submit_id": 120, "env": ["time": 2, "memory": 1024]
 };
 ```
-
-Результат работы:</br>
- ```
-results.json = [
-        {"result":"OK" or "WA" or "RT" or "PE" or "CE", "output": " 0 0 0 1259 123", "error": "could not find definition for X ..."}
-        {"result":"OK" or "WA" or "RT" or "PE" or "CE", "output": " 0 1234 0 12 97", "error": ""}
-]
- ```
 <b>Задачи с .h файлами:</b></br>
 
 К каждой функции идут тесты, лимиты, типы входа и выхода </br>
@@ -38,12 +30,33 @@ tests.json = [
 ]
 ```
 
-Файлы подгружаются из github репозитория при указании ссылки</br>
-```
-env.json = [ 
-    {"type":"h", "compiler": "g" or "py", "limit": "4", "memory":"64", "code":"" , "link":"https://github.com/ITClassDev/"}
+Результат работы:</br>
+ ```
+main_test_results.json = [
+        {"OOM":false,"duration":"0:0:0.009511","exitcode":"0","status":true},
+        {"OOM":false,"duration":"0:0:0.003160","exitcode":"139","status":false},
 ]
-```
+header_test_results.json = [
+    [
+        {"OOM":false,"duration":"0:0:0.003521","exitcode":"0","status":true},
+        {"OOM":false,"duration":"0:0:0.067150","exitcode":"139","status":false},
+        {"OOM":false,"duration":"0:0:0.002409","exitcode":"0","status":true}
+    ],
+    [
+        {"OOM":false,"duration":"0:0:2.003915","exitcode":"137","status":false},
+        {"OOM":false,"duration":"0:0:0.001897","exitcode":"0","status":true},
+        {"OOM":false,"duration":"0:0:0.002486","exitcode":"0","status":true}
+    ],
+    [
+        {"OOM":false,"duration":"0:0:0.002214","exitcode":"0","status":true},
+        {"OOM":false,"duration":"0:0:0.001931","exitcode":"0","status":true},
+        {"OOM":true,"duration":"0:0:0.042718","exitcode":"137","status":false}
+    ]
+]
+error_results.json = [
+	{"error":1,"error_msg":"error ....."}
+]
+ ```
 Docker attaching
 Attach via websockets to process with pid 1:
 ```
