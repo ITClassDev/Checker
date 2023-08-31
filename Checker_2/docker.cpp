@@ -73,8 +73,8 @@ string raw_request(string endpoint, int method, string data, string docker_socke
 json raw_api(string endpoint, int method, string data, bool plain, string docker_socket)
 {
     string plain_text = raw_request(endpoint, method, data);
-    if (plain) return {{"data", plain_text}};
-    json no_data = {
+	if (plain) return {{"data", plain_text}};
+	json no_data = {
         {"data", false}};
 
     if (plain_text.length() == 0)
