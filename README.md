@@ -51,8 +51,8 @@ header_test.json = {
 Результат работы:</br>
  ```
 main_test_results.json = [
-        {"OOM":false,"duration":"0:0:0.009511","exitcode":"0","status":true},
-        {"OOM":false,"duration":"0:0:0.003160","exitcode":"139","status":false},
+    {"OOM":false,"duration":"0:0:0.009511","exitcode":"0","status":true},
+    {"OOM":false,"duration":"0:0:0.003160","exitcode":"139","status":false},
 ]
 header_test_results.json = [
     [
