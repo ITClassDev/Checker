@@ -2,37 +2,52 @@
 прибраться...
 
 # Принцип работы 
-FrontEnd -> BackEnd -> Checker </br>
-
 <b>Одиночная задача:</b></br>
-tests.json - json с тестами </br>
 ```
-tests.json = {
-"tests":[
-	["input": "100\n50\n25", "output": "175\n1"],
-	["input": "1\n2\n3", "output": "6\n1"],
-	["input": "60\n30\n15", "output": "105\n1"]	],
-"submit_id": 120, "env": ["time": 2, "memory": 1024]
-};
+main_test.json = {
+    "language": "cpp",
+    "github_link": "https://github.com/ikoshkila/main_test_shtp.git",
+    "test_type": "main_test",
+    "tests_description": {
+        "tests": [
+            {"input": "100\n50\n25", "output": "175\n1"},
+            {"input": "1\n2\n3", "output": "6\n1"},
+            {"input": "60\n30\n15", "output": "105\n1"}   ],
+        "submit_id": 120,
+        "env": {"mem": 10, "proc": 2, "time": 2}
+    }
+}
 ```
 <b>Задачи с .h файлами:</b></br>
 
 К каждой функции идут тесты, лимиты, типы входа и выхода </br>
- ```
-tests.json = [
-{"name":"sum","tests":[
-	["input": "100\n120", "output": "220"],
-	["input": "20\n43", "output": "63"],
-	["input": "7\n123", "output": "130"]	], 
-"submit_id": 100, "types": ["in": ["int", "int"], "out": "int"], "env": ["time": 2, "memory": 1024]},
-{"name":"str_list","tests":[
-	["input": "abcdef", "output": "a b c d e f "],
-	["input": "lokira", "output": "l o k i r a "],
-	["input": "pgsppl", "output": "p g s p p l "]	], 
-"submit_id": 105, "types": ["in": ["string"], "out": "vector<char>"], "env", ["time": 2, "memory": 1024]}
-]
 ```
-
+header_test.json = {
+    "language": "cpp",
+    "github_link": "https://github.com/ikoshkila/header_test_shtp.git",
+    "test_type": "header_test",
+    "tests_description": [
+        {"name": "sum", "tests": [
+            {"input": "100\n120", "output": "220"},
+            {"input": "20\n43", "output": "63"},
+            {"input": "7\n123", "output": "130"}   ],
+        "submit_id": 100, "types": {"in": ["int", "int"], "out": "int"},
+        "env": {"mem": 10, "proc": 2, "time": 2} },
+        {"name": "str_list", "tests": [
+            {"input": "abcdef", "output": "a b c d e f "},
+            {"input": "lokira", "output": "l o k i r a "},
+            {"input": "pgsppl", "output": "p g s p p l "}   ],
+        "submit_id": 105, "types": {"in": ["string"], "out": "vector<char>"},
+        "env": {"mem": 10, "proc": 2, "time": 2} },
+        {"name": "concat", "tests": [
+            {"input": "a\nb", "output": "ab"},
+            {"input": "Hello,\nworld!", "output": "Hello,world!"},
+            {"input": "Result\nstring", "output": "Resultstring"}   ],
+        "submit_id": 111, "types": {"in": ["string", "string"], "out": "string"},
+        "env": {"mem": 10, "proc": 2, "time": 2} }
+    ]
+}
+```
 Результат работы:</br>
  ```
 main_test_results.json = [
