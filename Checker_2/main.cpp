@@ -5,18 +5,16 @@
 #include "docker.h"
 #include "types.h"
 
-#include <chrono>
-#include <thread>
+//#include <chrono>
 #include <filesystem>
-
 #include <regex>
-#include <curl/curl.h>
 
 using namespace std;
 using json = nlohmann::json;
 
 static string workspace_path = "./workspace/";
-static string workspace_absolute_path = "/home/iko/Desktop/proj/Checker/Checker_2/workspace/";
+static string workspace_absolute_path = filesystem::absolute(workspace_path);
+static bool debug = false;
 
 // used only to get container id
 string exec(const char *cmd){
@@ -128,7 +126,7 @@ string python_cli_run(string submission_id, string test, json env){
 }
 
 
-json cpp_test_one_func(json tests){
+json cpp_test_one_func(json tests, vector<string> headers){
 	string submission_id = to_string(tests["submit_id"]);
 	
 	if(filesystem::exists(workspace_path + submission_id + "/main.cpp")){
@@ -137,11 +135,11 @@ json cpp_test_one_func(json tests){
 	}
 	
 	ofstream main_file(workspace_path + submission_id + "/main.cpp");	
-	main_generator main(tests);
+	main_generator main(tests, headers);
 	main_file << main.code;
 	main_file.close();
-	
-	string comp_error = compile_cpp(submission_id, 1);	
+
+	string comp_error = compile_cpp(submission_id, 1);
 	if(comp_error != ""){
 		json result = {{"error", 1},{"error_msg", comp_error}};
 		return result;
@@ -168,6 +166,7 @@ json cpp_test_one_func(json tests){
 			}
 			string expected_output = test["output"];
 			test_verdict.push_back({"status", output == expected_output});
+			if(debug) test_verdict.push_back({"debug", (output + " : " + expected_output)});
 		}else{
 			test_verdict.push_back({"status", false});
 		}
@@ -180,11 +179,19 @@ json cpp_test_one_func(json tests){
 
 json cpp_test_multi_funcs(json tests){
 	json checker_verdict;
-	
+
+	vector<string> headers;
+	for(const auto &file : filesystem::directory_iterator(workspace_path + "tmp_git_files/")){
+		string file_name = file.path().filename();
+		if(file_name.substr(file_name.find('.')) == ".h"){
+			headers.push_back(file_name);
+		}
+	}
+
 	for(json::iterator func_it = tests.begin(); func_it != tests.end(); ++func_it){
 		json func = *func_it;
 			
-		json func_verdict = cpp_test_one_func(func);
+		json func_verdict = cpp_test_one_func(func, headers);
 		checker_verdict.push_back(func_verdict);
 	}
 	
@@ -223,6 +230,7 @@ json cpp_test_main(json tests, bool header){
 			
 			string expected_output = test["output"];
 			test_verdict.push_back({"status", output == expected_output});
+			if(debug) test_verdict.push_back({"debug", (output + " : " + expected_output)});
 		}else{
 			test_verdict.push_back({"status", false});
 		}
@@ -256,8 +264,9 @@ json python_test_main(json tests){
 				output = output.erase(output.size()-1);
 			}
 
-            string excepted_output = test["output"];
-            test_verdict.push_back({"status", output == excepted_output});
+            string expected_output = test["output"];
+            test_verdict.push_back({"status", output == expected_output});
+			if(debug) test_verdict.push_back({"debug", (output + " : " + expected_output)});
         }else if(status_code == 1){
 			// if python raise exception in code (error = 1 because its like a compilation error)
 			string output = get_container_logs(submission_container);
@@ -281,7 +290,7 @@ json python_test_main(json tests){
 void create_submit(string submission_id){
 	string submission_path = workspace_path + submission_id;
 	if(filesystem::exists(submission_path)){
-		string bash = "rm -r " + submission_path + "/*";
+		string bash = "rm -rf " + submission_path + "/*";
 		system(bash.c_str());
 	}else{
 		string bash = "mkdir " + submission_path + "/";
@@ -290,20 +299,39 @@ void create_submit(string submission_id){
 }
 
 void clean_dir(string dir_path){
-	string bash = "rm -r " + dir_path + " 2> /dev/null";
+	string bash = "rm -rf " + dir_path + " 2> /dev/null";
 	system(bash.c_str());
 }
 
+int clone_git(string link, string path){
+	clean_dir(path);
+
+	string link_body = link.substr(link.find("://") + 3);
+	string link_protocol = link.substr(0, link.find("://"));
+
+	string bash = "git clone " + link_protocol + "://checker_test:123456789@" + link_body + \
+				   " " + path + " 2> /dev/null";
+	system(bash.c_str());
+
+	if(!filesystem::exists(path)){
+		return 1;
+	}
+	return 0;
+}
 
 int setup_workspace(json input_json){
+	if(!filesystem::exists(workspace_path)){
+		system("mkdir workspace");
+	}
+
 	json tests = input_json["tests_description"];
 	string github_link = input_json["github_link"];
 	string language = input_json["language"];
-	string git_path = workspace_path + "tmp_git_files/";
+	string tmp_path = workspace_path + "tmp_git_files/";
 
-	clean_dir(git_path);
-	string bash = "git clone " + github_link + " " + git_path + " 2> /dev/null";
-	system(bash.c_str());
+	if(clone_git(github_link, tmp_path) == 1){
+		return 1;
+	}
 
 	if(tests.is_array()){
 		for(json::iterator test_it = tests.begin(); test_it != tests.end(); ++test_it){
@@ -316,7 +344,7 @@ int setup_workspace(json input_json){
 		create_submit(submission_id);
 	}
 
-	for(const auto &file : filesystem::directory_iterator(git_path)){
+	for(const auto &file : filesystem::directory_iterator(tmp_path)){
 		filesystem::path file_path = file.path();
 		string file_name = file_path.filename();
 		string file_ext = file_name.substr(file_name.find('.') + 1);
@@ -418,24 +446,22 @@ int setup_workspace(json input_json){
 // firstly run: systemctl start docker
 // to compile and run this shit: g++ main.cpp docker.cpp types.cpp -lcurl -lfmt -o test && sudo ./test && cat result.json
 // read comments for more info
-// i havent tested it much, but im assuming this shit works.
+// i havent tested it much, but im assuming this shit works
 
-// think about compiling tests in container rather than on the host (cout\dynamic lib error) 
-// merge with main.cpp; adjust python cli run default limits;
-// add setup_ws python support; add exitcodes for python; 
-// add setup_ws private git handler
+// tasks:
+// compile tests in container; check tests in main?
 
-// write tests:
-// existed main cpp
-// error syntax cpp
-// error syntax python
-
-// replace all /home/code and all system related with ""
+// 1st arg  - path to test json
+// 2nd arg - debug (show expected output and real output or not)
 
 int main(int argc, char *argv[]){
 	// rm previous result json
 	system("rm result.json 2> /dev/null");
 	
+	if(argc >= 2){
+		debug = (argv[2] == "1");
+	}
+
 	ifstream input_json_file(argv[1]);
 	json input_json = json::parse(input_json_file);
 	input_json_file.close();
@@ -446,8 +472,14 @@ int main(int argc, char *argv[]){
 	string language = input_json["language"];
 
 	// main should always be named main.py or main.cpp
-	setup_workspace(input_json);
-	// all non-main.cpp files will be considered as function files (in header test)
+	// all non-main.cpp files will be considered as function and header files (in header test)
+	if(setup_workspace(input_json) == 1){
+		json result = {{"error", 3},{"error_msg", "github repository is private or does not exist"}};
+		ofstream result_json_file("result.json");
+		result_json_file << result << "\n";
+		result_json_file.close();
+		return 1;
+	}
 
 	if(language == "cpp"){
 		if(test_type == "header_test"){
@@ -471,6 +503,12 @@ int main(int argc, char *argv[]){
 	return 0;
 }
 
+// If some error occurred while running tests or etc, the result json will have 
+// "error" representing the internal error code and "error_msg" for more info
+// internal error codes:
+// 1 - compilation error
+// 2 - the main file already exists
+// 3 - github repository is private or does not exist
 
 // test_type:
 // header_test 		- test that has only functions and header file
@@ -485,7 +523,6 @@ int main(int argc, char *argv[]){
 // if entered value 0 or less than default, the default value will be used 
 
 // test verdict json description:
-// as i think exitcode for python image is differenti
 // python exitcode:
 // 1 - if error while runing (traceback ...)
 // 2 - if cant find file

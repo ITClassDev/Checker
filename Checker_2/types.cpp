@@ -11,7 +11,7 @@ using json = nlohmann::json;
 // if you need to out only function return value, than "type" "out" must be
 // string (not array as in other case)
 
-main_generator::main_generator(json test){
+main_generator::main_generator(json test, vector<string> headers){
 	vector<string> type_vec;
 	vector<string> name_vec;
 
@@ -61,6 +61,8 @@ main_generator::main_generator(json test){
 			add_vector(1, out_type, "output");
 		}else if(out_type == "string"){
 			add_string(1, "output");
+		}else if(out_type.find("double") != -1 || out_type.find("float") != -1){
+			add_float(1, out_type, "output");
 		}else{
 			add_simple(1, out_type, "output");
 		}
@@ -68,13 +70,16 @@ main_generator::main_generator(json test){
 		code += "    ";
 	}
 
-	add_includes();
+	add_includes(headers);
 
 	code += "}";
 }
 
-void main_generator::add_includes(){
-	code = "#include \"header.h\"\n#include <iostream>\n" + code;
+void main_generator::add_includes(vector<string> headers){
+	for(long long int i=0; i<headers.size(); i++){
+		code = "#include \"" + headers[i] + "\"\n" + code;
+	}
+	code = "#include <iostream>\n" + code;
 	for(long long int i=0; i<includes.size(); i++){
 		code = "#include <" + includes[i] + ">\n" + code;
 	}
@@ -111,6 +116,13 @@ void main_generator::add_string(int direction, string name){
 		code +=	"    getline(std::cin," + name + ");\n";
 	}else if(direction == 1){
 		code += "    std::cout << " + name + ";\n";
+	}
+}
+
+void main_generator::add_float(int direction, string type, string name){
+	push_include("iomanip");
+	if(direction == 1){
+		code += "    std::cout << std::fixed << std::setprecision(5) << " + name + ";\n";
 	}
 }
 

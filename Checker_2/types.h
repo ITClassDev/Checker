@@ -12,13 +12,14 @@ class main_generator{
 
 	public:
 	string code;
-	void add_includes();
+	void add_includes(vector<string> headers);
 
 	void add_vector(int direction, string type, string name);
 	void add_string(int direction, string name);
 	void add_simple(int direction, string type, string name);
+	void add_float(int direction, string type, string name);
 
-	main_generator(json test);
+	main_generator(json test, vector<string> headers);
 };
 
 
