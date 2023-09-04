@@ -1,15 +1,14 @@
 #pragma once
 
-#include <curl/curl.h>
-#include <iostream>
-#include <cstring>
 #include "json.hpp"
-#include <fmt/core.h>
+#include <curl/curl.h>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <iostream>
 #include <cstdlib>
+#include <cstring>
 
 namespace beast = boost::beast;
 namespace http = beast::http;
