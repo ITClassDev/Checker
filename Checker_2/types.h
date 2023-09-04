@@ -9,6 +9,7 @@ class main_generator{
 	private:
 	vector<string> includes;
 	void push_include(string include);
+	bool cin_used = false;
 
 	public:
 	string code;
