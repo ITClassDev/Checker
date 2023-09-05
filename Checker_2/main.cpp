@@ -136,7 +136,6 @@ json cpp_test_one_func(json tests, vector<string> headers){
 	
 	ofstream main_file(workspace_path + submission_id + "/main.cpp");	
 	main_generator main(tests, headers);
-	cout << main.code << "\n\n";
 	main_file << main.code;
 	main_file.close();
 
