@@ -445,7 +445,7 @@ int setup_workspace(json input_json){
 
 
 // firstly run: systemctl start docker
-// to compile and run this shit: g++ main.cpp docker.cpp types.cpp -lcurl -lfmt -o test && sudo ./test && cat result.json
+// to compile and run this shit: g++ main.cpp docker.cpp types.cpp -lcurl -o test && sudo ./test && cat result.json
 // read comments for more info
 // i havent tested it much, but im assuming this shit works
 
