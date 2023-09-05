@@ -8,7 +8,7 @@
             "proc": 2,
             "time": 2
         },
-        "submit_id": 160,
+        "submit_id": "160",
         "tests": [
             {
                 "input": "1\n2\n5\n5",

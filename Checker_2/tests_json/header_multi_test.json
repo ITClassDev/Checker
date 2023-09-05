@@ -10,7 +10,7 @@
                 "time": 2
             },
             "name": "sum",
-            "submit_id": 101,
+            "submit_id": "101",
             "tests": [
                 {
                     "input": "100\n120",
@@ -40,7 +40,7 @@
                 "time": 2
             },
             "name": "str_list",
-            "submit_id": 106,
+            "submit_id": "106",
             "tests": [
                 {
                     "input": "abcdef",
@@ -69,7 +69,7 @@
                 "time": 2
             },
             "name": "concat",
-            "submit_id": 112,
+            "submit_id": "112",
             "tests": [
                 {
                     "input": "a\nb",
