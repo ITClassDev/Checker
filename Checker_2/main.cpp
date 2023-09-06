@@ -6,7 +6,8 @@
 #include "json.hpp"
 #include "crow.h"
 
-//#include <chrono>
+#include <ctime>
+#include <chrono>
 #include <filesystem>
 #include <regex>
 
@@ -39,41 +40,22 @@ string exec(const char *cmd){
 
 
 // used only for compilation
-string execute(string command, string submission_id){
-	string bash = command + " 2> " + workspace_path + submission_id + "/comp_output";
-	system(bash.c_str());
-	string output;	
-	ifstream f(workspace_path + submission_id + "/comp_output");
-	if(f.is_open()){
-		string line;
-		getline(f,line);
-		while(getline(f, line)){
-			// remove submission path from error
-			line = regex_replace(line, regex(workspace_path + submission_id + "/"), "");
-			output += line + "\n";
-		}
-	}
-	return output;
-}
+//string execute(string command, string submission_id){
+//	string bash = command + " 2> " + workspace_path + submission_id + "/comp_output";
+//	system(bash.c_str());
+//	string output;	
+//	ifstream f(workspace_path + submission_id + "/comp_output");
+//	if(f.is_open()){
+//		string line;
+//		while(getline(f, line)){
+//			// remove submission path from error
+//			line = regex_replace(line, regex(workspace_path + submission_id + "/"), "");
+//			output += line + "\n";
+//		}
+//	}
+//	return output;
+//}
 
-
-string compile_cpp(string submission_id, bool header){
-	string submission_path = workspace_path + submission_id;
-	string bash = "g++ " + submission_path + "/main.cpp ";
-	if(header){
-		for(const auto &file : filesystem::directory_iterator(submission_path)){
-			string file_name = file.path().filename();
-			if(file_name != "main.cpp"){
-				bash += submission_path + "/" + file_name + " ";
-			}
-		}
-	}
-//	bash += "-o " + workspace_path + submission_id + "/main";
-//	tmp solution - compile test statically link stl libs
-	bash += "-o " + submission_path + "/main -static";
-	
-	return execute(bash.c_str(), submission_id);
-}
 
 // hardcoded duration calculation via string conversion
 string calculate_duration(string finish, string start){
@@ -89,6 +71,112 @@ string calculate_duration(string finish, string start){
 }
 
 
+int clean_workspace(){
+	time_t now = chrono::system_clock::to_time_t(chrono::system_clock::now());
+	time_t last;
+
+	struct tm time_tmp;
+	ifstream config_file("./config");
+	string last_time_str;
+	getline(config_file, last_time_str);
+	config_file.close();
+	strptime(last_time_str.c_str(), "%Y.%m.%d %H:%M:%S", &time_tmp);
+	last = mktime(&time_tmp);
+
+	double diff = difftime(now, last);
+	
+	// if diff more than week
+	if(diff > 604800.0){
+		char now_time_str[25];
+		strftime(now_time_str, sizeof(now_time_str), "%Y.%m.%d %H:%M:%S", localtime(&now));
+		ofstream config_file("./config");
+		config_file << now_time_str << "\n";
+		config_file.close();
+
+		system(("rm -rf " + workspace_path + "* 2> /dev/null").c_str());
+	}
+
+	return 0;
+}
+
+
+//string compile_cpp(string submission_id, bool header){
+//	string submission_path = workspace_path + submission_id;
+//	string bash = "g++ " + submission_path + "/main.cpp ";
+//	if(header){
+//		for(const auto &file : filesystem::directory_iterator(submission_path)){
+//			string file_name = file.path().filename();
+//			if(file_name != "main.cpp"){
+//				bash += submission_path + "/" + file_name + " ";
+//			}
+//		}
+//	}
+////	bash += "-o " + workspace_path + submission_id + "/main";
+////	tmp solution - compile test statically link stl libs
+//	bash += "-o " + submission_path + "/main -static";
+//	
+//	return execute(bash.c_str(), submission_id);
+//}
+
+
+string compile_cpp(string submission_id, bool header){
+	string submission_path = "/home/code/" + submission_id;
+	string entrypoint = "sh -c \"g++ " + submission_path + "/main.cpp ";
+	if(header){
+		for(const auto &file : filesystem::directory_iterator(workspace_path + submission_id)){
+			string file_name = file.path().filename();
+			if(file_name != "main.cpp"){
+				entrypoint += "'" + submission_path + "/" + file_name + "' ";
+			}
+		}
+	}
+	entrypoint += "-o " + submission_path + "/main 2> " + submission_path + "/comp_output\"";
+	
+	string mount_to = "/home/code/";
+	string image = "frolvlad/alpine-gxx:latest";
+	string bash = "docker run --network none -itd -v " + workspace_absolute_path + ":" + mount_to + " " + image + " " + entrypoint;
+	string container_id = exec(bash.c_str());
+	container_id = container_id.erase(container_id.size() - 1);
+	int status_code = wait_for_container(container_id)["StatusCode"];	
+	remove_container(container_id);
+
+	string comp_output;	
+	ifstream comp_output_file(workspace_path + submission_id + "/comp_output");
+	if(comp_output_file.is_open()){
+		string line;
+		while(getline(comp_output_file, line)){
+			comp_output += line + "\n";
+		}
+	}
+	comp_output_file.close();
+	if(comp_output != ""){
+		comp_output = regex_replace(comp_output, regex("\\r\\n"), "\n");
+		comp_output = regex_replace(comp_output, regex("/home/code/" + submission_id + "/"), "");
+	}
+	
+	return comp_output;
+}
+
+
+//string cpp_cli_run(string submission_id, string test, json env){
+//	int time_limit = 1;
+//	int mem_limit = 6;
+//	int proc_limit = 2;
+//	if(env["time"] > time_limit){ time_limit = env["time"]; }
+//	if(env["mem"] > mem_limit){ mem_limit = env["mem"]; }
+//	if(env["proc"] > proc_limit){ proc_limit = env["proc"]; }
+//	
+//	string limits = "--memory=" + to_string(mem_limit) + "m --memory-swap=" + to_string(mem_limit) + "m --pids-limit=" + to_string(proc_limit) + " --ulimit cpu=" + to_string(time_limit);
+//	string mount_to = "/home/code";
+//	string image = "ubuntu:latest";
+//	string entrypoint = "bash -c \"./home/code/" + submission_id + "/main <<< '" + test + "'\"";
+//	string bash = "docker run --network none " + limits + " -itd -v " + workspace_absolute_path + ":" + mount_to + " " + image + " " + entrypoint;
+//
+//	string container_id_messy = exec(bash.c_str());
+//	return container_id_messy.erase(container_id_messy.size() - 1);
+//}
+
+
 string cpp_cli_run(string submission_id, string test, json env){
 	int time_limit = 1;
 	int mem_limit = 6;
@@ -99,10 +187,10 @@ string cpp_cli_run(string submission_id, string test, json env){
 	
 	string limits = "--memory=" + to_string(mem_limit) + "m --memory-swap=" + to_string(mem_limit) + "m --pids-limit=" + to_string(proc_limit) + " --ulimit cpu=" + to_string(time_limit);
 	string mount_to = "/home/code";
-	string image = "ubuntu:latest";
-	string entrypoint = "bash -c \"./home/code/" + submission_id + "/main <<< '" + test + "'\"";
+	string image = "frolvlad/alpine-gxx:latest";
+	string entrypoint = "sh -c \"./home/code/" + submission_id + "/main < <(echo '" + test + "')\"";
 	string bash = "docker run --network none " + limits + " -itd -v " + workspace_absolute_path + ":" + mount_to + " " + image + " " + entrypoint;
-
+	
 	string container_id_messy = exec(bash.c_str());
 	return container_id_messy.erase(container_id_messy.size() - 1);
 }
@@ -167,19 +255,20 @@ json cpp_test_one_func(json tests, vector<string> headers){
 				output = output.erase(output.size()-1);
 			}
 			string expected_output = test["output"];
-			test_verdict.push_back({"status", output == expected_output});
+			test_verdict.push_back({"passed", output == expected_output});
 			
 			passed_counter += (int)(output == expected_output);
 			if(debug) test_verdict.push_back({"debug", (output + " : " + expected_output)});
 		}else{
-			test_verdict.push_back({"status", false});
+			test_verdict.push_back({"passed", false});
 		}
 		remove_container(submission_container);
 		func_verdict["tests_results"].push_back(test_verdict);
 	}
 	func_verdict["submit_id"] = submission_id;
 	func_verdict["solved"] = tests["tests"].size() == passed_counter;
-	
+	func_verdict["error"] = 0;
+
 	return func_verdict;
 }
 
@@ -237,18 +326,19 @@ json cpp_test_main(json tests, bool header){
 			}
 			
 			string expected_output = test["output"];
-			test_verdict.push_back({"status", output == expected_output});
+			test_verdict.push_back({"passed", output == expected_output});
 
 			passed_counter += (int)(output == expected_output);
 			if(debug) test_verdict.push_back({"debug", (output + " : " + expected_output)});
 		}else{
-			test_verdict.push_back({"status", false});
+			test_verdict.push_back({"passed", false});
 		}
 		remove_container(submission_container);
 		checker_verdict["tests_results"].push_back(test_verdict);
 	}
 	checker_verdict["submit_id"] = submission_id;
 	checker_verdict["solved"] = tests["tests"].size() == passed_counter;
+	checker_verdict["error"] = 0;
 	
 	return checker_verdict;
 }
@@ -279,7 +369,7 @@ json python_test_main(json tests){
 			}
 
             string expected_output = test["output"];
-            test_verdict.push_back({"status", output == expected_output});
+            test_verdict.push_back({"passed", output == expected_output});
 
 			passed_counter += (int)(output == expected_output);
 			if(debug) test_verdict.push_back({"debug", (output + " : " + expected_output)});
@@ -294,13 +384,14 @@ json python_test_main(json tests){
 			remove_container(submission_container);
 			return result;
 		}else{	
-			test_verdict.push_back({"status", false});
+			test_verdict.push_back({"passed", false});
 		}
         remove_container(submission_container);
 		checker_verdict["tests_results"].push_back(test_verdict);
     }
 	checker_verdict["submit_id"] = submission_id;
 	checker_verdict["solved"] = tests["tests"].size() == passed_counter;
+	checker_verdict["error"] = 0;
 	
     return checker_verdict;
 }
@@ -389,28 +480,28 @@ int setup_workspace(json input_json){
 
 // json for header function
 // in types you can place type name or number of input type if it has &
-// github_link - "https://github.com/ikoshkila/header_test_shtp.git"
 // const json header_test = {
 // {"language", "cpp"},
+// {"github_link", "https://github.com/ikoshkila/header_test_shtp.git"},
 // {"test_type", "header_test"},
 // {"tests_description",{
 // 	{{"name","sum"},{"tests",{
 // 		{{"input", "100\n120"}, {"output", "220"}},
 // 		{{"input", "20\n43"}, {"output", "63"}},             		     // should cause segfault (139)
 // 		{{"input", "7\n123"}, {"output", "130"}}	}}, 
-// 	{"submit_id", 100}, {"types", {{"in", {"int", "int"}}, {"out", "int"}}},
+// 	{"submit_id", "100"}, {"types", {{"in", {"int", "int"}}, {"out", "int"}}},
 // 	{"env", {{"time", 2},{"mem", 10},{"proc", 2}}}},
 // 	{{"name","str_list"},{"tests",{
 // 		{{"input", "abcdef"}, {"output", "a b c d e f "}},               // should cause time_limit (137)
 // 		{{"input", "lokira"}, {"output", "l o k i r a "}},
 // 		{{"input", "pgsppl"}, {"output", "p g s p p l "}}	}}, 
-// 	{"submit_id", 105}, {"types", {{"in", {"string"}}, {"out", "vector<char>"}}},
+// 	{"submit_id", "105"}, {"types", {{"in", {"string"}}, {"out", "vector<char>"}}},
 // 	{"env", {{"time", 2},{"mem", 10},{"proc", 2}}}},
 // 	{{"name","concat"},{"tests",{
 // 		{{"input", "a\nb"}, {"output", "ab"}},
 // 		{{"input", "Hello,\nworld!"}, {"output", "Hello,world!"}},
 // 		{{"input", "Result\nstring"}, {"output", "Resultstring"}} }},    // should cause mem_limit (137 & OOM)
-// 	{"submit_id", 111}, {"types", {{"in", {"string", "string"}}, {"out", "string"}}},
+// 	{"submit_id", "111"}, {"types", {{"in", {"string", "string"}}, {"out", "string"}}},
 // 	{"env", {{"time", 2},{"mem", 10},{"proc", 2}}}},
 // //	{{"name", "odd_even"}, {"test",{
 // //		{{"input", "1 2 3 4 5 6 7 8 9"},{"output", "2 4 6 8 \n1 3 5 7 9 "}},
@@ -419,45 +510,46 @@ int setup_workspace(json input_json){
 // //	{"env", {{"time", 2}, {"memory", 1024}}}}
 // }} };
 
+
 // json for one file function
-// github_link - "https://github.com/ikoshkila/main_test_shtp.git"
 // const json main_test = {
 // {"language", "cpp"},
+// {"github_link", "https://github.com/ikoshkila/main_test_shtp.git"},
 // {"test_type", "main_test"},
 // {"tests_description",{
 // 	{"tests",{
 // 		{{"input", "100\n50\n25"}, {"output", "175\n1"}},    		     // should cause segfault (139)
 // 		{{"input", "1\n2\n3"}, {"output", "6\n1"}},
 // 		{{"input", "60\n30\n15"}, {"output", "105\n1"}}	}},
-// 	{"submit_id", 120}, {"env", {{"time", 2},{"mem", 10},{"proc", 2}}}
+// 	{"submit_id", "120"}, {"env", {{"time", 2},{"mem", 10},{"proc", 2}}}
 // }} };
 
 
 // json for header with already created main function is absolutely like just one func test,
 // but it work with different function
 // const json header_main_test = {
-// github_link - "https://github.com/ikoshkila/header_main_test_shtp.git"
 // {"language", "cpp"},
+// {"github_link", "https://github.com/ikoshkila/header_main_test_shtp.git"},
 // {"test_type", "header_main_test"},
 // {"tests_description",{
 // 	{"tests",{
 // 		{{"input", "1 2 3 4 5 6 7 8 9\n-1 2 -3 4 -5 6"},{"output", "1 3 5 7 9 \n2 4 6 8 \n2 4 6 \n-1 -3 -5 "}},
 // 		{{"input", "11 12 13 14 15 16\n1 -2 3 -4 5 -6"},{"output", "11 13 15 \n12 14 16 \n1 3 5 \n-2 -4 -6 "}} }},
-// 	{"submit_id", 150}, {"env", {{"time", 2}, {"mem", 10},{"proc", 2}}}
+// 	{"submit_id", "150"}, {"env", {{"time", 2}, {"mem", 10},{"proc", 2}}}
 // }} };
 
 
 // json like main_test for cpp but for python
-// github_link - "https://github.com/ikoshkila/main_test_py_shtp.git"
 // const json header_main_test = {
 // {"language", "python"},
+// {"github_link", "https://github.com/ikoshkila/main_test_py_shtp.git"},
 // {"test_type", "header_main_test"},
 // {"tests_description",{
 // 	{"tests",{
 // 		{{"input", "1\n2\n5\n5"},{"output", "3\n3"}},
 // 		{{"input", "10\n20\n1\n1"},{"output", "30\n-19"}} }},
 // 		{{"input", "10\n20\n1\n1"},{"output", "40\n0"}} }},
-// 	{"submit_id", 160}, {"env", {{"time", 2}, {"mem", 10},{"proc", 2}}}
+// 	{"submit_id", "160"}, {"env", {{"time", 2}, {"mem", 10},{"proc", 2}}}
 // }} };
 
 
@@ -468,16 +560,9 @@ int setup_workspace(json input_json){
 // i havent tested it much, but im assuming this shit works
 
 // tasks:
-// compile tests in container; check tests in main?;
-// if compile tests in container i prefer use alpine-gxx
-// link in args;
-// remove submissions in header tests;
-// remove exes?
+// check tests in main?;
 
-// 1st arg  - path to test json
-// 2nd arg - debug (show expected output and real output or not)
-
-int main(int argc, char *argv[]){
+int main(){
 	crow::SimpleApp app;
 	CROW_ROUTE(app, "/")([](){
 		return "I'm alive";
@@ -490,7 +575,9 @@ int main(int argc, char *argv[]){
 		json tests_json = input_json["tests_description"];
 		string test_type = input_json["test_type"];
 		string language = input_json["language"];
-
+		
+		// clean workspace dir every week
+		int clean_status = clean_workspace();
 		if(setup_workspace(input_json) == 1){
 			json result = {{"error", 3},{"error_msg", "github repository is private or does not exist"}};
 			return crow::response{result.dump()};
@@ -521,9 +608,14 @@ int main(int argc, char *argv[]){
 // If some error occurred while running tests or etc, the result json will have 
 // "error" representing the internal error code and "error_msg" for more info
 // internal error codes:
+// 0 - no error
 // 1 - compilation error
 // 2 - the main file already exists
 // 3 - github repository is private or does not exist
+
+// language:
+// cpp
+// python
 
 // test_type:
 // header_test 		- test that has only functions and header file
