@@ -222,6 +222,10 @@ json cpp_test_one_func(json tests, vector<string> headers){
 		json result = {{"error", 2},{"error_msg", "main file already exists\n"}};
 		return result;
 	}
+	if(tests["types"]["out"].is_string() && tests["types"]["out"] == "ANY_ANSWER_CORRECT"){
+		json result = {{"error", 0}, {"solved", true}, {"submit_id", submission_id}, {"tests_results", [{{"OOM", false}, {"duration", "0:0:0.000000"}, {"exitcode", "0"}, {"passed", true}}] }};
+		return result;
+	}
 	
 	ofstream main_file(workspace_path + submission_id + "/main.cpp");	
 	main_generator main(tests, headers);
@@ -303,7 +307,11 @@ json cpp_test_main(json tests, bool header){
 		json result = {{"error", 1},{"error_msg", comp_error}};
 		return result;
 	}
-
+	if(tests["types"]["out"].is_string() && tests["types"]["out"] == "ANY_ANSWER_CORRECT"){
+		json result = {{"error", 0}, {"solved", true}, {"submit_id", submission_id}, {"tests_results", [{{"OOM", false}, {"duration", "0:0:0.000000"}, {"exitcode", "0"}, {"passed", true}}] }};
+		return result;
+	}
+	
 	json checker_verdict;
 	int passed_counter = 0; 
 	for(json::iterator test_it = tests["tests"].begin(); test_it != tests["tests"].end(); ++test_it){
@@ -347,6 +355,11 @@ json cpp_test_main(json tests, bool header){
 json python_test_main(json tests){
     string submission_id = tests["submit_id"];
 	
+	if(tests["types"]["out"].is_string() && tests["types"]["out"] == "ANY_ANSWER_CORRECT"){
+		json result = {{"error", 0}, {"solved", true}, {"submit_id", submission_id}, {"tests_results", [{{"OOM", false}, {"duration", "0:0:0.000000"}, {"exitcode", "0"}, {"passed", true}}] }};
+		return result;
+	}
+
 	json checker_verdict;
 	int passed_counter = 0;
     for (json::iterator test_it = tests["tests"].begin(); test_it != tests["tests"].end(); ++test_it){
