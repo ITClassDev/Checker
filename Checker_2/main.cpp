@@ -223,7 +223,7 @@ json cpp_test_one_func(json tests, vector<string> headers){
 		return result;
 	}
 	if(tests["types"]["out"].is_string() && tests["types"]["out"] == "ANY_ANSWER_CORRECT"){
-		json result = {{"error", 0}, {"solved", true}, {"submit_id", submission_id}, {"tests_results", [{{"OOM", false}, {"duration", "0:0:0.000000"}, {"exitcode", "0"}, {"passed", true}}] }};
+		json result = {{"error", 0}, {"solved", true}, {"submit_id", submission_id}, {"tests_results", json::array({ {{"OOM", false}, {"duration", "0:0:0.000000"}, {"exitcode", "0"}, {"passed", true}} }) }};
 		return result;
 	}
 	
@@ -308,7 +308,7 @@ json cpp_test_main(json tests, bool header){
 		return result;
 	}
 	if(tests["types"]["out"].is_string() && tests["types"]["out"] == "ANY_ANSWER_CORRECT"){
-		json result = {{"error", 0}, {"solved", true}, {"submit_id", submission_id}, {"tests_results", [{{"OOM", false}, {"duration", "0:0:0.000000"}, {"exitcode", "0"}, {"passed", true}}] }};
+		json result = {{"error", 0}, {"solved", true}, {"submit_id", submission_id}, {"tests_results", json::array({ {{"OOM", false}, {"duration", "0:0:0.000000"}, {"exitcode", "0"}, {"passed", true}} }) }};
 		return result;
 	}
 	
@@ -356,7 +356,7 @@ json python_test_main(json tests){
     string submission_id = tests["submit_id"];
 	
 	if(tests["types"]["out"].is_string() && tests["types"]["out"] == "ANY_ANSWER_CORRECT"){
-		json result = {{"error", 0}, {"solved", true}, {"submit_id", submission_id}, {"tests_results", [{{"OOM", false}, {"duration", "0:0:0.000000"}, {"exitcode", "0"}, {"passed", true}}] }};
+		json result = {{"error", 0}, {"solved", true}, {"submit_id", submission_id}, {"tests_results", json::array({ {{"OOM", false}, {"duration", "0:0:0.000000"}, {"exitcode", "0"}, {"passed", true}} }) }};
 		return result;
 	}
 
