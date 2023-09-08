@@ -22,39 +22,50 @@ main_generator::main_generator(json test, vector<string> headers){
 	vector<string> name_vec;
 
 	code += "using namespace std;\n\nint main(){\n";
-		
-	for(long long int i=0; i<test["types"]["in"].size(); i++){
-		string variable = test["types"]["in"][i];
-		string type;
-		string name;
-		int tmp_space_index = variable.find(' ');
-		if(tmp_space_index != -1){
-			type = variable.substr(0, tmp_space_index);
-			name = variable.substr(tmp_space_index + 1, variable.size() - tmp_space_index + 1);
-		}else{
-			type = variable;
-			name = "a" + to_string(i);
-		}
-
-		name_vec.push_back(name);
-
-		for(int i=type.size(); i>=0; i--){
-			if(type[i] == '&'){
-				type.erase(i,1);
+	if(test["types"]["in"] != json::array({"void"})){
+		for(long long int i=0; i<test["types"]["in"].size(); i++){
+			string variable = test["types"]["in"][i];
+			string type;
+			string name;
+			int tmp_space_index = variable.find(' ');
+			if(tmp_space_index != -1){
+				type = variable.substr(0, tmp_space_index);
+				name = variable.substr(tmp_space_index + 1, variable.size() - tmp_space_index + 1);
+			}else{
+				type = variable;
+				name = "a" + to_string(i);
+			}
+	
+			name_vec.push_back(name);
+	
+			for(int i=type.size(); i>=0; i--){
+				if(type[i] == '&'){
+					type.erase(i,1);
+				}
+			}
+			
+			code += "    " + type + " " + name + ";\n";
+	
+			if(type.find("vector") != -1){
+				add_vector(0, type, name);
+			}else if(type == "string"){
+				add_string(0, name);
+			}else{
+				add_simple(0, type, name);
 			}
 		}
-		
-		code += "    " + type + " " + name + ";\n";
-
-		if(type.find("vector") != -1){
-			add_vector(0, type, name);
-		}else if(type == "string"){
-			add_string(0, name);
-		}else{
-			add_simple(0, type, name);
-		}
 	}
-	if(test["types"]["out"].is_string()){
+	if(test["types"]["out"].is_string() && test["types"]["out"] == "void"){
+		if(test["types"]["in"] == json::array({"void"})){
+			code += "    " + string(test["name"]) + "();\n";
+		}else{
+			code += "    " + string(test["name"]) + "(";
+			for(long long int input_i = 0; input_i < test["types"]["in"].size() - 1; input_i++){
+				code += string(name_vec[input_i]) + ",";
+			}
+			code += string(name_vec[name_vec.size()-1]) + ");\n";
+		}
+	}else if(test["types"]["out"].is_string()){
 		string out_type = test["types"]["out"];
 		code += "    " + out_type + " output = " + string(test["name"]) + "(";
 		for(long long int input_i = 0; input_i < test["types"]["in"].size() - 1; input_i++){

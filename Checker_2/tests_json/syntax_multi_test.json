@@ -2,6 +2,7 @@
 	"language": "cpp",
     "github_link": "https://github.com/ikoshkila/syntax_multi_test_cpp_shtp.git",
     "test_type": "header_test",
+	"debug": false,
     "tests_description": [
         {
             "env": {

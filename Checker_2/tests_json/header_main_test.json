@@ -2,7 +2,8 @@
 	"language": "cpp",
     "github_link": "https://github.com/ikoshkila/header_main_test_shtp.git",
     "test_type": "header_main_test",
-    "tests_description": {
+    "debug": false,
+	"tests_description": {
         "env": {
             "mem": 10,
             "proc": 2,

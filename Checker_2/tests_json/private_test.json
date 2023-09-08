@@ -2,6 +2,7 @@
 	"language": "cpp",
     "github_link": "https://github.com/ikoshkila/private_test_shtp.git",	
     "test_type": "main_test",
+	"debug": false,
     "tests_description": {
         "env": {
             "mem": 10,

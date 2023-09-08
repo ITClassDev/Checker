@@ -17,6 +17,7 @@ using json = nlohmann::json;
 static string workspace_path = "./workspace/";
 static string workspace_absolute_path = filesystem::absolute(workspace_path);
 static bool debug = false;
+static string cpp_test_method = "alpine";
 
 // used only to get container id
 string exec(const char *cmd){
@@ -39,24 +40,6 @@ string exec(const char *cmd){
 }
 
 
-// used only for compilation
-//string execute(string command, string submission_id){
-//	string bash = command + " 2> " + workspace_path + submission_id + "/comp_output";
-//	system(bash.c_str());
-//	string output;	
-//	ifstream f(workspace_path + submission_id + "/comp_output");
-//	if(f.is_open()){
-//		string line;
-//		while(getline(f, line)){
-//			// remove submission path from error
-//			line = regex_replace(line, regex(workspace_path + submission_id + "/"), "");
-//			output += line + "\n";
-//		}
-//	}
-//	return output;
-//}
-
-
 // hardcoded duration calculation via string conversion
 string calculate_duration(string finish, string start){
 	string finish_time = finish.substr(finish.find(':')-2, 15);
@@ -71,74 +54,42 @@ string calculate_duration(string finish, string start){
 }
 
 
-int clean_workspace(){
-	time_t now = chrono::system_clock::to_time_t(chrono::system_clock::now());
-	time_t last;
-
-	struct tm time_tmp;
-	ifstream config_file("./config");
-	string last_time_str;
-	getline(config_file, last_time_str);
-	config_file.close();
-	strptime(last_time_str.c_str(), "%Y.%m.%d %H:%M:%S", &time_tmp);
-	last = mktime(&time_tmp);
-
-	double diff = difftime(now, last);
-	
-	// if diff more than week
-	if(diff > 604800.0){
-		char now_time_str[25];
-		strftime(now_time_str, sizeof(now_time_str), "%Y.%m.%d %H:%M:%S", localtime(&now));
-		ofstream config_file("./config");
-		config_file << now_time_str << "\n";
-		config_file.close();
-
-		system(("rm -rf " + workspace_path + "* 2> /dev/null").c_str());
-	}
-
-	return 0;
-}
-
-
-//string compile_cpp(string submission_id, bool header){
-//	string submission_path = workspace_path + submission_id;
-//	string bash = "g++ " + submission_path + "/main.cpp ";
-//	if(header){
-//		for(const auto &file : filesystem::directory_iterator(submission_path)){
-//			string file_name = file.path().filename();
-//			if(file_name != "main.cpp"){
-//				bash += submission_path + "/" + file_name + " ";
-//			}
-//		}
-//	}
-////	bash += "-o " + workspace_path + submission_id + "/main";
-////	tmp solution - compile test statically link stl libs
-//	bash += "-o " + submission_path + "/main -static";
-//	
-//	return execute(bash.c_str(), submission_id);
-//}
-
-
 string compile_cpp(string submission_id, bool header){
-	string submission_path = "/home/code/" + submission_id;
-	string entrypoint = "sh -c \"g++ " + submission_path + "/main.cpp ";
-	if(header){
-		for(const auto &file : filesystem::directory_iterator(workspace_path + submission_id)){
-			string file_name = file.path().filename();
-			if(file_name != "main.cpp"){
-				entrypoint += "'" + submission_path + "/" + file_name + "' ";
+	if(cpp_test_method == "alpine"){
+		string submission_path = "/home/code/" + submission_id;
+		string entrypoint = "sh -c \"g++ " + submission_path + "/main.cpp ";
+		if(header){
+			for(const auto &file : filesystem::directory_iterator(workspace_path + submission_id)){
+				string file_name = file.path().filename();
+				if(file_name != "main.cpp"){
+					entrypoint += "'" + submission_path + "/" + file_name + "' ";
+				}
 			}
 		}
+		entrypoint += "-o " + submission_path + "/main 2> " + submission_path + "/comp_output\"";
+		
+		string mount_to = "/home/code/";
+		string image = "frolvlad/alpine-gxx:latest";
+		string bash = "docker run --network none -itd -v " + workspace_absolute_path + ":" + mount_to + " " + image + " " + entrypoint;
+		string container_id = exec(bash.c_str());
+		container_id = container_id.erase(container_id.size() - 1);
+		int status_code = wait_for_container(container_id)["StatusCode"];	
+		remove_container(container_id);
+
+	}else if(cpp_test_method == "ubuntu"){
+		string submission_path = workspace_path + submission_id;
+		string bash = "g++ " + submission_path + "/main.cpp ";
+		if(header){
+			for(const auto &file : filesystem::directory_iterator(submission_path)){
+				string file_name = file.path().filename();
+				if(file_name != "main.cpp"){
+					bash += submission_path + "/" + file_name + " ";
+				}
+			}
+		}
+		bash += "-o " + submission_path + "/main -static 2> " + submission_path + "/comp_output";
+		system(bash.c_str());	
 	}
-	entrypoint += "-o " + submission_path + "/main 2> " + submission_path + "/comp_output\"";
-	
-	string mount_to = "/home/code/";
-	string image = "frolvlad/alpine-gxx:latest";
-	string bash = "docker run --network none -itd -v " + workspace_absolute_path + ":" + mount_to + " " + image + " " + entrypoint;
-	string container_id = exec(bash.c_str());
-	container_id = container_id.erase(container_id.size() - 1);
-	int status_code = wait_for_container(container_id)["StatusCode"];	
-	remove_container(container_id);
 
 	string comp_output;	
 	ifstream comp_output_file(workspace_path + submission_id + "/comp_output");
@@ -151,30 +102,15 @@ string compile_cpp(string submission_id, bool header){
 	comp_output_file.close();
 	if(comp_output != ""){
 		comp_output = regex_replace(comp_output, regex("\\r\\n"), "\n");
-		comp_output = regex_replace(comp_output, regex("/home/code/" + submission_id + "/"), "");
+		if(cpp_test_method == "alpine"){
+			comp_output = regex_replace(comp_output, regex("/home/code/" + submission_id + "/"), "");
+		}else if(cpp_test_method == "ubuntu"){
+			comp_output = regex_replace(comp_output, regex(workspace_path + submission_id + "/"), "");
+		}
 	}
 	
 	return comp_output;
 }
-
-
-//string cpp_cli_run(string submission_id, string test, json env){
-//	int time_limit = 1;
-//	int mem_limit = 6;
-//	int proc_limit = 2;
-//	if(env["time"] > time_limit){ time_limit = env["time"]; }
-//	if(env["mem"] > mem_limit){ mem_limit = env["mem"]; }
-//	if(env["proc"] > proc_limit){ proc_limit = env["proc"]; }
-//	
-//	string limits = "--memory=" + to_string(mem_limit) + "m --memory-swap=" + to_string(mem_limit) + "m --pids-limit=" + to_string(proc_limit) + " --ulimit cpu=" + to_string(time_limit);
-//	string mount_to = "/home/code";
-//	string image = "ubuntu:latest";
-//	string entrypoint = "bash -c \"./home/code/" + submission_id + "/main <<< '" + test + "'\"";
-//	string bash = "docker run --network none " + limits + " -itd -v " + workspace_absolute_path + ":" + mount_to + " " + image + " " + entrypoint;
-//
-//	string container_id_messy = exec(bash.c_str());
-//	return container_id_messy.erase(container_id_messy.size() - 1);
-//}
 
 
 string cpp_cli_run(string submission_id, string test, json env){
@@ -187,8 +123,15 @@ string cpp_cli_run(string submission_id, string test, json env){
 	
 	string limits = "--memory=" + to_string(mem_limit) + "m --memory-swap=" + to_string(mem_limit) + "m --pids-limit=" + to_string(proc_limit) + " --ulimit cpu=" + to_string(time_limit);
 	string mount_to = "/home/code";
-	string image = "frolvlad/alpine-gxx:latest";
-	string entrypoint = "sh -c \"./home/code/" + submission_id + "/main < <(echo '" + test + "')\"";
+	string image;
+	string entrypoint;
+	if(cpp_test_method == "alpine"){
+		image = "frolvlad/alpine-gxx:latest";
+		entrypoint = "sh -c \"./home/code/" + submission_id + "/main < <(echo '" + test + "')\"";
+	}else if(cpp_test_method == "ubuntu"){
+		image = "ubuntu:latest";
+		entrypoint = "bash -c \"./home/code/" + submission_id + "/main <<< '" + test + "'\"";
+	}
 	string bash = "docker run --network none " + limits + " -itd -v " + workspace_absolute_path + ":" + mount_to + " " + image + " " + entrypoint;
 	
 	string container_id_messy = exec(bash.c_str());
@@ -222,16 +165,12 @@ json cpp_test_one_func(json tests, vector<string> headers){
 		json result = {{"error", 2},{"error_msg", "main file already exists\n"}};
 		return result;
 	}
-	if(tests["types"]["out"].is_string() && tests["types"]["out"] == "ANY_ANSWER_CORRECT"){
-		json result = {{"error", 0}, {"solved", true}, {"submit_id", submission_id}, {"tests_results", json::array({ {{"OOM", false}, {"duration", "0:0:0.000000"}, {"exitcode", "0"}, {"passed", true}} }) }};
-		return result;
-	}
-	
+
 	ofstream main_file(workspace_path + submission_id + "/main.cpp");	
 	main_generator main(tests, headers);
 	main_file << main.code;
 	main_file.close();
-
+	
 	string comp_error = compile_cpp(submission_id, 1);
 	if(comp_error != ""){
 		json result = {{"error", 1},{"error_msg", comp_error}};
@@ -258,10 +197,15 @@ json cpp_test_one_func(json tests, vector<string> headers){
 			if(output[output.size()-1] == '\n'){
 				output = output.erase(output.size()-1);
 			}
+
 			string expected_output = test["output"];
 			test_verdict.push_back({"passed", output == expected_output});
-			
 			passed_counter += (int)(output == expected_output);
+
+			if(expected_output == "ANY_ANSWER_CORRECT"){
+				passed_counter += 1;
+				test_verdict["passed"] = true;
+			}
 			if(debug) test_verdict.push_back({"debug", (output + " : " + expected_output)});
 		}else{
 			test_verdict.push_back({"passed", false});
@@ -307,10 +251,6 @@ json cpp_test_main(json tests, bool header){
 		json result = {{"error", 1},{"error_msg", comp_error}};
 		return result;
 	}
-	if(tests["types"]["out"].is_string() && tests["types"]["out"] == "ANY_ANSWER_CORRECT"){
-		json result = {{"error", 0}, {"solved", true}, {"submit_id", submission_id}, {"tests_results", json::array({ {{"OOM", false}, {"duration", "0:0:0.000000"}, {"exitcode", "0"}, {"passed", true}} }) }};
-		return result;
-	}
 	
 	json checker_verdict;
 	int passed_counter = 0; 
@@ -335,8 +275,12 @@ json cpp_test_main(json tests, bool header){
 			
 			string expected_output = test["output"];
 			test_verdict.push_back({"passed", output == expected_output});
-
 			passed_counter += (int)(output == expected_output);
+
+			if(expected_output == "ANY_ANSWER_CORRECT"){
+				passed_counter += 1;
+				test_verdict["passed"] = true;
+			}
 			if(debug) test_verdict.push_back({"debug", (output + " : " + expected_output)});
 		}else{
 			test_verdict.push_back({"passed", false});
@@ -354,11 +298,6 @@ json cpp_test_main(json tests, bool header){
 
 json python_test_main(json tests){
     string submission_id = tests["submit_id"];
-	
-	if(tests["types"]["out"].is_string() && tests["types"]["out"] == "ANY_ANSWER_CORRECT"){
-		json result = {{"error", 0}, {"solved", true}, {"submit_id", submission_id}, {"tests_results", json::array({ {{"OOM", false}, {"duration", "0:0:0.000000"}, {"exitcode", "0"}, {"passed", true}} }) }};
-		return result;
-	}
 
 	json checker_verdict;
 	int passed_counter = 0;
@@ -374,7 +313,7 @@ json python_test_main(json tests){
 		test_verdict.push_back({"duration", calculate_duration(inspect_response["State"]["FinishedAt"], inspect_response["State"]["StartedAt"])});
 		test_verdict.push_back({"OOM", inspect_response["State"]["OOMKilled"]});
 
-        if (!status_code){
+        if(!status_code){
             string output = get_container_logs(submission_container);
             output = regex_replace(output, regex("\\r\\n"), "\n");
 			if(output[output.size()-1] == '\n'){
@@ -383,8 +322,12 @@ json python_test_main(json tests){
 
             string expected_output = test["output"];
             test_verdict.push_back({"passed", output == expected_output});
-
 			passed_counter += (int)(output == expected_output);
+			
+			if(expected_output == "ANY_ANSWER_CORRECT"){
+				passed_counter += 1;
+				test_verdict["passed"] = true;
+			}
 			if(debug) test_verdict.push_back({"debug", (output + " : " + expected_output)});
         }else if(status_code == 1){
 			// if python raise exception in code (error = 1 because its like a compilation error)
@@ -491,6 +434,63 @@ int setup_workspace(json input_json){
 }
 
 
+int load_config(){
+	string last_time_str;
+	string current_method_str;
+	string other_str, tmp_line;
+	
+	ifstream config_file("./config");
+	int line_cnt = 0; 
+	while(getline(config_file, tmp_line)){
+		if(line_cnt == 0){
+			last_time_str = tmp_line;
+		}else if(line_cnt == 1){
+			current_method_str = tmp_line;
+		}else{
+			other_str += tmp_line + "\n";
+		}
+		line_cnt++;
+	}
+	config_file.close();
+
+
+	// clean workspace dir every week
+	time_t now = chrono::system_clock::to_time_t(chrono::system_clock::now());
+	time_t last;
+	struct tm time_tmp;
+	strptime(last_time_str.c_str(), "%Y.%m.%d %H:%M:%S", &time_tmp);
+	last = mktime(&time_tmp);
+
+	double diff = difftime(now, last);
+	
+	// if diff more than week
+	if(diff > 604800.0){
+		char now_time_str[25];
+		strftime(now_time_str, sizeof(now_time_str), "%Y.%m.%d %H:%M:%S", localtime(&now));
+		ofstream config_file("./config");
+		config_file << now_time_str << "\n" << current_method_str << "\n" << other_str;
+		config_file.close();
+
+		system(("rm -rf " + workspace_path + "* 2> /dev/null").c_str());
+		
+		last_time_str = now_time_str;
+	}
+
+
+	// get cpp test method
+	if(current_method_str == "alpine" || current_method_str == "ubuntu"){
+		cpp_test_method = current_method_str;
+	}else{
+		ofstream config_file("./config");
+		config_file << last_time_str << "\n" << cpp_test_method << "\n" << other_str;
+		config_file.close();
+		return 2;
+	}
+
+	return 0;
+}
+
+
 // json for header function
 // in types you can place type name or number of input type if it has &
 // const json header_test = {
@@ -588,9 +588,13 @@ int main(){
 		json tests_json = input_json["tests_description"];
 		string test_type = input_json["test_type"];
 		string language = input_json["language"];
-		
-		// clean workspace dir every week
-		int clean_status = clean_workspace();
+		debug = input_json["debug"];
+
+		int load_status = load_config();
+		if(load_status == 2){
+			cout << "\nincorrect cpp test method in config file (changed on " << cpp_test_method << ")\n\n";
+		}
+
 		if(setup_workspace(input_json) == 1){
 			json result = {{"error", 3},{"error_msg", "github repository is private or does not exist"}};
 			return crow::response{result.dump()};
@@ -648,7 +652,7 @@ int main(){
 // 2 - if cant find file
 // 128 + n - same
 //
-// exitcode:
+// ubuntu exitcode:
 // 125 - if 'docker run' itself fails
 // 126 - if contained command cannot be invoked
 // 127 - if contained command cannot be found
