@@ -463,7 +463,7 @@ int load_config(){
 
 	double diff = difftime(now, last);
 	
-	// if diff more than week
+	// if diff more than week clean workspace
 	if(diff > 604800.0){
 		char now_time_str[25];
 		strftime(now_time_str, sizeof(now_time_str), "%Y.%m.%d %H:%M:%S", localtime(&now));
@@ -491,64 +491,62 @@ int load_config(){
 }
 
 
-// json for header function
-// in types you can place type name or number of input type if it has &
+// json for tests with only header and func files 
+// (checker generate main.cpp)
 // const json header_test = {
 // {"language", "cpp"},
 // {"github_link", "https://github.com/ikoshkila/header_test_shtp.git"},
 // {"test_type", "header_test"},
+// {"debug", false},
 // {"tests_description",{
 // 	{{"name","sum"},{"tests",{
 // 		{{"input", "100\n120"}, {"output", "220"}},
-// 		{{"input", "20\n43"}, {"output", "63"}},             		     // should cause segfault (139)
+// 		{{"input", "20\n43"}, {"output", "63"}},             		     
 // 		{{"input", "7\n123"}, {"output", "130"}}	}}, 
-// 	{"submit_id", "100"}, {"types", {{"in", {"int", "int"}}, {"out", "int"}}},
+// 	{"submit_id", "1"}, {"types", {{"in", {"int", "int"}}, {"out", "int"}}},
 // 	{"env", {{"time", 2},{"mem", 10},{"proc", 2}}}},
 // 	{{"name","str_list"},{"tests",{
-// 		{{"input", "abcdef"}, {"output", "a b c d e f "}},               // should cause time_limit (137)
+// 		{{"input", "abcdef"}, {"output", "a b c d e f "}},               
 // 		{{"input", "lokira"}, {"output", "l o k i r a "}},
 // 		{{"input", "pgsppl"}, {"output", "p g s p p l "}}	}}, 
-// 	{"submit_id", "105"}, {"types", {{"in", {"string"}}, {"out", "vector<char>"}}},
+// 	{"submit_id", "2"}, {"types", {{"in", {"string"}}, {"out", "vector<char>"}}},
 // 	{"env", {{"time", 2},{"mem", 10},{"proc", 2}}}},
 // 	{{"name","concat"},{"tests",{
 // 		{{"input", "a\nb"}, {"output", "ab"}},
 // 		{{"input", "Hello,\nworld!"}, {"output", "Hello,world!"}},
-// 		{{"input", "Result\nstring"}, {"output", "Resultstring"}} }},    // should cause mem_limit (137 & OOM)
-// 	{"submit_id", "111"}, {"types", {{"in", {"string", "string"}}, {"out", "string"}}},
-// 	{"env", {{"time", 2},{"mem", 10},{"proc", 2}}}},
-// //	{{"name", "odd_even"}, {"test",{
-// //		{{"input", "1 2 3 4 5 6 7 8 9"},{"output", "2 4 6 8 \n1 3 5 7 9 "}},
-// //		{{"input", "11 12 13 14 15 16"},{"output", "12 14 16 \n11 13 15 "}}	}},
-// //	{"submit_id", 130}, {"types", {{"in", {"vector<int>&", "vector<int>&", "vector<int>&"}}, {"out", {"2", "3"}}}},
-// //	{"env", {{"time", 2}, {"memory", 1024}}}}
+// 		{{"input", "Result\nstring"}, {"output", "Resultstring"}} }},    
+// 	{"submit_id", "3"}, {"types", {{"in", {"string", "string"}}, {"out", "string"}}},
+// 	{"env", {{"time", 2},{"mem", 10},{"proc", 2}}}}
 // }} };
 
 
-// json for one file function
+// json for tests with only main file
 // const json main_test = {
 // {"language", "cpp"},
 // {"github_link", "https://github.com/ikoshkila/main_test_shtp.git"},
 // {"test_type", "main_test"},
+// {"debug", false},
 // {"tests_description",{
 // 	{"tests",{
-// 		{{"input", "100\n50\n25"}, {"output", "175\n1"}},    		     // should cause segfault (139)
+// 		{{"input", "100\n50\n25"}, {"output", "175\n1"}},    		     
 // 		{{"input", "1\n2\n3"}, {"output", "6\n1"}},
 // 		{{"input", "60\n30\n15"}, {"output", "105\n1"}}	}},
-// 	{"submit_id", "120"}, {"env", {{"time", 2},{"mem", 10},{"proc", 2}}}
+// 	{"submit_id", "4"}, {"env", {{"time", 2},{"mem", 10},{"proc", 2}}}
 // }} };
 
 
-// json for header with already created main function is absolutely like just one func test,
-// but it work with different function
+// json for tests like main_test but also you have func and header file 
+// (its absolutely like main_test, but it work with different function)
 // const json header_main_test = {
 // {"language", "cpp"},
 // {"github_link", "https://github.com/ikoshkila/header_main_test_shtp.git"},
 // {"test_type", "header_main_test"},
+// {"debug", false},
 // {"tests_description",{
 // 	{"tests",{
 // 		{{"input", "1 2 3 4 5 6 7 8 9\n-1 2 -3 4 -5 6"},{"output", "1 3 5 7 9 \n2 4 6 8 \n2 4 6 \n-1 -3 -5 "}},
 // 		{{"input", "11 12 13 14 15 16\n1 -2 3 -4 5 -6"},{"output", "11 13 15 \n12 14 16 \n1 3 5 \n-2 -4 -6 "}} }},
-// 	{"submit_id", "150"}, {"env", {{"time", 2}, {"mem", 10},{"proc", 2}}}
+// 	{"submit_id", "5"}, {"env", {{"time", 2}, {"mem", 10},{"proc", 2}}}
 // }} };
 
 
@@ -557,22 +555,29 @@ int load_config(){
 // {"language", "python"},
 // {"github_link", "https://github.com/ikoshkila/main_test_py_shtp.git"},
 // {"test_type", "header_main_test"},
+// {"debug", false},
 // {"tests_description",{
 // 	{"tests",{
 // 		{{"input", "1\n2\n5\n5"},{"output", "3\n3"}},
 // 		{{"input", "10\n20\n1\n1"},{"output", "30\n-19"}} }},
 // 		{{"input", "10\n20\n1\n1"},{"output", "40\n0"}} }},
-// 	{"submit_id", "160"}, {"env", {{"time", 2}, {"mem", 10},{"proc", 2}}}
+// 	{"submit_id", "6"}, {"env", {{"time", 2}, {"mem", 10},{"proc", 2}}}
 // }} };
 
 
 
-// firstly run: systemctl start docker
-// to compile and run this shit: g++ main.cpp docker.cpp types.cpp -lcurl -o test && sudo ./test && cat result.json
+// test checker work:
+// firstly run "systemctl start docker"
+// you need this docker images: python:latest ; ubuntu:latest ; frolvlad/alpine-gxx:latest
+// to compile this shit: "g++ main.cpp docker.cpp types.cpp -lcurl -o test"
+// than run "./test" and at the same time run "python3 test_service.py ./<path_to_test_json>"
+// <path_to_test_json> can be path to one of jsons in tests_json dir
+// than to view results open "result.json"
 // read comments for more info
 // i havent tested it much, but im assuming this shit works
 
 // tasks:
+// check pep8?;
 // check tests in main?;
 
 int main(){
@@ -589,13 +594,13 @@ int main(){
 		string test_type = input_json["test_type"];
 		string language = input_json["language"];
 		debug = input_json["debug"];
-
+		
 		int load_status = load_config();
 		if(load_status == 2){
 			cout << "\nincorrect cpp test method in config file (changed on " << cpp_test_method << ")\n\n";
 		}
-
-		if(setup_workspace(input_json) == 1){
+		int setup_status = setup_workspace(input_json);
+		if(setup_status == 1){
 			json result = {{"error", 3},{"error_msg", "github repository is private or does not exist"}};
 			return crow::response{result.dump()};
 		}
@@ -622,23 +627,18 @@ int main(){
 	return 0;
 }
 
-// If some error occurred while running tests or etc, the result json will have 
-// "error" representing the internal error code and "error_msg" for more info
-// internal error codes:
-// 0 - no error
-// 1 - compilation error
-// 2 - the main file already exists
-// 3 - github repository is private or does not exist
 
 // language:
 // cpp
 // python
-
+//
 // test_type:
 // header_test 		- test that has only functions and header file
 // main_test   		- test that consist only of main file
 // header_main_test - test that has everything (header, main, funcs)
-
+//
+// debug - show output and expected output
+//
 // env(limits) description:
 // name | description                               | units      | default
 // time - specify the max time allotted for testing - [seconds]  - 1
@@ -646,11 +646,25 @@ int main(){
 // proc - specify max number of processes           -            - 2
 // if entered value 0 or less than default, the default value will be used 
 
+
 // test verdict json description:
+// 
+// if some error occurred while running tests or etc, the result json will have 
+// "error" representing the internal error code and "error_msg" for more info
+// internal error codes:
+// 0 - no error
+// 1 - compilation error
+// 2 - the main file already exists
+// 3 - github repository is private or does not exist
+//
+// alpine exitcode:
+// list it...
+//
 // python exitcode:
 // 1 - if error while runing (traceback ...)
 // 2 - if cant find file
-// 128 + n - same
+// 128 + n - same as in ubuntu
+// complete list
 //
 // ubuntu exitcode:
 // 125 - if 'docker run' itself fails
@@ -691,6 +705,9 @@ int main(){
 //     SIGPWR          30
 //     SIGSYS          31
 //     SIGUNUSED       31
+//
 // OOM: whether the container exit with an OOM
-// status: whether the test result is correct
+// 
+// passed: whether the test result is correct
+// 
 // duration: how long has the container been running

@@ -20,6 +20,8 @@ class main_generator{
 	void add_simple(int direction, string type, string name);
 	void add_float(int direction, string type, string name);
 
+	void add_function_call(string func_name, vector<string> params);
+
 	main_generator(json test, vector<string> headers);
 };
 
