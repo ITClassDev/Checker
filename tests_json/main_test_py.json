@@ -1,0 +1,29 @@
+{
+	"language": "python",
+    "github_link": "https://github.com/ikoshkila/main_test_py_shtp.git",
+    "test_type": "main_test",
+	"debug": false,
+    "tests_description": {
+        "env": {
+            "mem": 10,
+            "proc": 2,
+            "time": 2
+        },
+        "submit_id": "160",
+        "tests": [
+            {
+                "input": "1\n2\n5\n5",
+                "output": "3\n3"
+            },
+            {
+                "input": "10\n20\n1\n1",
+                "output": "30\n-19"
+            },
+            {
+                "input": "20\n20\n20\n20",
+                "output": "40\n0"
+            }
+        ]
+    }
+}
+

@@ -1,0 +1,27 @@
+{
+	"language": "python",
+    "test_type": "main_test",
+    "tests_description": {
+        "env": {
+            "mem": 10,
+            "proc": 2,
+            "time": 2
+        },
+        "submit_id": 171,
+        "tests": [
+            {
+                "input": "10",
+                "output": "30\n20\n11"
+            },
+            {
+                "input": "5",
+                "output": "15\n10\n6"
+            },
+            {
+                "input": "20",
+                "output": "60\n40\n21"
+            }
+        ]
+    }
+}
+

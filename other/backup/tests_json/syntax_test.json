@@ -1,0 +1,18 @@
+{
+	"language": "cpp",
+    "test_type": "main_test",
+    "tests_description": {
+        "env": {
+            "mem": 10,
+            "proc": 2,
+            "time": 2
+        },
+        "submit_id": 120,
+        "tests": [
+            {
+                "input": "",
+                "output": "asd"
+            }
+        ]
+    }
+}
