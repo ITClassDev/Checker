@@ -1,8 +1,3 @@
-# Задачи
-переписать примеры result json'ов ; 
-описать правила test json'ов ; 
-прибраться... 
-
 # Принцип работы 
 для каждой проверки нужен json
 
@@ -85,7 +80,8 @@ error_results.json = [
 	{"error":1,"error_msg":"error ....."}
 ]
 ```
-Docker attaching
+(больше информации можно найти в info.txt)
+# Docker attaching
 Attach via websockets to process with pid 1:
 ```
 docker run -itd --name=itc_python ubuntu:20.04 bash -i -c "bash -i" # Run container with bash
