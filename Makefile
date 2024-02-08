@@ -9,22 +9,22 @@ CXXFLAGS = -std=c++17 -Wall -Wformat
 LIBS = -lcurl
 
 all: $(EXE)
-    @echo build complete
+	@echo build complete
 
 $(EXE): $(OBJS) $(MAIN)
-    $(CXX) -o $@ $(MAIN) $(OBJS) $(CXXFLAGS) $(LIBS)
+	$(CXX) -o $@ $(MAIN) $(OBJS) $(CXXFLAGS) $(LIBS)
 
 $(OBJ_DIR)checker.o : checker.cpp obj_dir
-    $(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJ_DIR)docker.o : docker.cpp obj_dir
-    $(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJ_DIR)generator.o : generator.cpp obj_dir
-    $(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(OBJ_DIR)utils.o : utils.cpp obj_dir
-    $(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 obj_dir :
 	mkdir $(OBJ_DIR)
