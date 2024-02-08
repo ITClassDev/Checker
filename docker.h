@@ -1,23 +1,16 @@
-#pragma once
+#ifndef DOCKER_H
+#define DOCKER_H
 
-#include "json.hpp"
-#include <curl/curl.h>
-#include <boost/beast/core.hpp>
-#include <boost/beast/websocket.hpp>
-#include <boost/asio/connect.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <iostream>
-#include <cstdlib>
-#include <cstring>
 
-namespace beast = boost::beast;
-namespace http = beast::http;
-namespace websocket = beast::websocket;
+#include "common.h"
+
+namespace http = boost::beast::http;
+namespace websocket = boost::beast::websocket;
 namespace net = boost::asio;
 
 using tcp = boost::asio::ip::tcp;
 using namespace std;
-using json = nlohmann::json;
+
 
 size_t writeFunction(void* ptr, size_t size, size_t nmemb, string* data);
 string raw_request(string endpoint, int method=0, string data="", string docker_socket="/var/run/docker.sock");
@@ -40,3 +33,6 @@ json remove_container(string id, string host="http://localhost/v1.41");
 
 // Bad working
 websocket::stream<tcp::socket> attach_to_container_ws(string id, bool stream=true, bool stdout=false, bool stdin=false, bool logs=false, string host="127.0.0.1", string port="2375");
+
+
+#endif

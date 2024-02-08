@@ -1,8 +1,8 @@
 {
-	"language": "python",
+    "language": "python",
     "github_link": "https://github.com/ikoshkila/syntax_test_py_shtp.git",
     "test_type": "main_test",
-	"debug": false,
+    "debug": false,
     "tests_description": {
         "env": {
             "mem": 10,

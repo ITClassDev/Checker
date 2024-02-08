@@ -3,11 +3,11 @@
     "github_link": "https://github.com/ikoshkila/header_multiout_test_shtp.git",
     "test_type": "header_test",
     "debug": false,
-	"tests_description": [
-		{"name": "odd_even", "tests": [
-			{"input": "1 2 3 4 5 6 7 8 9", "output": "1 3 5 7 9 \n2 4 6 8 "},
-			{"input": "11 12 13 14 15 16", "output": "11 13 15 \n12 14 16 "} ],
-		"submit_id": "1001", "types": {"in": ["vector<int> &", "vector<int> &", "vector<int> &"], "out": [2, 3] },		
-		"env": {"mem": 10, "proc": 2, "time": 2} }
-	]
+    "tests_description": [
+        {"name": "odd_even", "tests": [
+            {"input": "1 2 3 4 5 6 7 8 9", "output": "1 3 5 7 9 \n2 4 6 8 "},
+            {"input": "11 12 13 14 15 16", "output": "11 13 15 \n12 14 16 "} ],
+        "submit_id": "1001", "types": {"in": ["vector<int> &", "vector<int> &", "vector<int> &"], "out": [2, 3] },      
+        "env": {"mem": 10, "proc": 2, "time": 2} }
+    ]
 }

@@ -4,6 +4,7 @@
 
 #include "common.h"
 
+
 class Workspace{
     private:
     std::string workspace_path;
@@ -15,11 +16,26 @@ class Workspace{
     Workspace();
     Workspace(std::string _workspace_path);
     ~Workspace();
+    std::string cleanWorkspace(std::string last_clean_time);
     int prepareWorkspace(json input_json);
     std::string getWorkspacePath();
 };
 
-int loadConfig(std::string workspace_path, std::string &cpp_test_method);
+class Config{
+    private:
+    std::map<std::string, std::string> data;
+    std::string config_path;
+
+    public:
+    Config();
+    Config(std::string _config_path);
+    ~Config();
+    std::string get(std::string key);
+    int update(std::string key, std::string value);
+    int load();
+    int save();
+};
+
 std::string exec(const char *cmd);
 std::string calculate_duration(std::string finish, std::string start);
 

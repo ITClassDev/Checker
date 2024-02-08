@@ -3,16 +3,16 @@
     "github_link": "https://github.com/ret7020/CppHeaders.git",
     "test_type": "header_test",
     "debug": false,
-	"tests_description": [
-		{"name": "itc_name", "tests": [
-			{"input": "", "output": "ANY_ANSWER_CORRECT"}   ],
-		"submit_id": "8", "types": {"in": ["void"], "out": "void"},
-		"env": {"mem": 10, "proc": 2, "time": 2} },
+    "tests_description": [
+        {"name": "itc_name", "tests": [
+            {"input": "", "output": "ANY_ANSWER_CORRECT"}   ],
+        "submit_id": "8", "types": {"in": ["void"], "out": "void"},
+        "env": {"mem": 10, "proc": 2, "time": 2} },
 
-		{"name": "itc_fio", "tests": [
-			{"input": "", "output": "ANY_ANSWER_CORRECT"}   ], 
-		"submit_id": "9", "types": {"in": ["void"], "out": "void"},
-		"env": {"mem": 10, "proc": 2, "time": 2} },
+        {"name": "itc_fio", "tests": [
+            {"input": "", "output": "ANY_ANSWER_CORRECT"}   ], 
+        "submit_id": "9", "types": {"in": ["void"], "out": "void"},
+        "env": {"mem": 10, "proc": 2, "time": 2} },
 
         {"name": "itc_abs", "tests": [
             {"input": "-34", "output": "34"},

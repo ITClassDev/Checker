@@ -6,13 +6,18 @@ usage and test:
 you can choose between alpine and ubuntu by modifying second line of "./config": "ubuntu" / "alpine"
 - compile checker: "g++ main.cpp docker.cpp checker.cpp generator.cpp utils.cpp -lcurl -o checker"
 - and run checker via: "./checker"
-- then you can run "python3 test_service.py ./<path_to_test_json>", where <path_to_test_json> can be 
-path to one of jsons in tests_json dir or your own, some of tests in tests_json are bad and always
-will result in passed:false
+- then you can run "python3 test_service.py ./<path_to_test_json> <type>", where <path_to_test_json>
+can be path to one of jsons in tests_json dir or your own and <type> is type of test: "h" (homework) 
+or "c" (challenge), some of tests in tests_json are bad and always will result in passed:false
 - to view results open "result.json"
 
 
 tests json:
+tests can be sent on /homework and /challenge route
+/homework - download files from a given github and can accept different test_type
+/challenge - copy files from local source and can test only main test_type
+
+/homework tests:
 example:
   "language": "cpp",
   "github_link": "https://github.com/ikoshkila/header_multi_func_test_shtp.git",
@@ -59,14 +64,45 @@ structure:
         +- mem          - limit memory usage (swap and regular)
         +- proc         - limit number of pids for test
         +- time         - limit time for test
+
+/challenge tests:
+example:
+  "language": "cpp",
+  "file_path": "/home/admin/Backend/app/challenges/109dj01jdmain.cpp",
+  "debug": false,
+  "tests_description": {
+      "env": { "mem": 10, "proc": 2, "time": 2 },
+      "submit_id": "101",
+      "tests": [
+          { "input": "100\n120", "output": "220" },
+          { "input": "20\n43",   "output": "63"  },
+          { "input": "7\n123",   "output": "130" }
+      ]
+  }
+structure:
+  +- language           - programming language
+  +- file_path          - absolute local path to code file
+  +- debug              - set whether to add test results to result.json
+  +- test_description   - desctibe tests for each function
+     +- submit_id       - id of test
+     +- tests           - tests for current function
+     |  +- input        - test input
+     |  +- output       - output that function should give
+     +- env             - environment limits
+        +- mem          - limit memory usage (swap and regular)
+        +- proc         - limit number of pids for test
+        +- time         - limit time for test
+
+
 structure specifications:
-  language: for now lanuage can be only python or cpp 
+  file_path: only absolute local path to .cpp or .py file
+  language: for now lanuage can be only python or cpp
   debug: adds to results debug field, that contain output and expected output
   submit_id: can be any value you like        
   
   test_type description:
-  header_test 	   - test that has only functions and header files  - generate main automaticaly via test json
-  main_test   	   - test that consist only of main file            - not generating main
+  header_test      - test that has only functions and header files  - generate main automaticaly via test json
+  main_test        - test that consist only of main file            - not generating main
   header_main_test - test that has everything (header, main, funcs) - not generating main
   
   env description:
@@ -112,6 +148,8 @@ structure specifications:
   1 - compilation error
   2 - the main file already exist (only for header_test)
   3 - github repository is private or does not exist
+  4 - cant load config
+  5 - nothing, just something went wrong
 
   error_msg: if internal error occurre, than error_msg field appears and give more info
   submit_id: submit id passed at test json

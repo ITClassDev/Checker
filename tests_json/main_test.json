@@ -1,8 +1,8 @@
 {
-	"language": "cpp",
+    "language": "cpp",
     "github_link": "https://github.com/ikoshkila/main_test_shtp.git",
     "test_type": "main_test",
-	"debug": false,
+    "debug": false,
     "tests_description": {
         "env": {
             "mem": 10,

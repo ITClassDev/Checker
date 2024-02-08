@@ -21,15 +21,11 @@ with open(sys.argv[1], "r") as f:
     json_data = f.read()
 payload = json.loads(json_data)
 
-#print(json.dumps(payload, indent=4), "\n") 
-#print(json.dumps(payload_test), "\n")
-#print(type(payload), type(payload_test))
-#print("\n\n")
-
-
-result = requests.post("http://localhost:7777/homework", data=json.dumps(payload), timeout=10000)
-#print("\n\n")
-#print(result.text)
+result = 0
+if(sys.argv[2] == "h"):
+    result = requests.post("http://localhost:7777/homework", data=json.dumps(payload), timeout=10000)
+if(sys.argv[2] == "c"):
+    result = requests.post("http://localhost:7777/challenge", data=json.dumps(payload), timeout=10000)
 
 out_f = open("result.json", "w")
 out_f.write(result.text)
