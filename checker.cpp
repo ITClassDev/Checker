@@ -124,7 +124,12 @@ json CppChecker::testFunc(json tests, bool debug){
     // compile test and check if errors occurred
     std::string comp_error = compileTest(submission_id, 1);
     if(comp_error != ""){
-        json result = {{"error", 1},{"error_msg", comp_error}};
+        json result;
+        if(comp_error.find("No such file") != -1lu){
+            result = {{"error", 6}, {"error_msg", "cant find any files to test"}};
+        }else{
+            result = {{"error", 1},{"error_msg", comp_error}};
+        }
         return result;
     }
 
@@ -214,10 +219,15 @@ json CppChecker::testMain(json tests, bool header, bool debug){
     // compile and check if error occurred
     std::string comp_error = compileTest(submission_id, header);
     if(comp_error != ""){
-        json result = {{"error", 1},{"error_msg", comp_error}};
+        json result;
+        if(comp_error.find("No such file") != -1lu){
+            result = {{"error", 6}, {"error_msg", "cant find any files to test"}};
+        }else{
+            result = {{"error", 1},{"error_msg", comp_error}};
+        }
         return result;
     }
-    
+
     // iterate through tests
     json func_verdict;
     int passed_counter = 0;
@@ -353,6 +363,10 @@ json PythonChecker::testMain(json tests, bool debug){
             comp_error = regex_replace(comp_error, regex("\\r\\n"), "\n");
             comp_error = regex_replace(comp_error, regex("/home/code/" + submission_id + "/"), "");
             json result = {{"error", 1},{"error_msg", comp_error}};
+            remove_container(container_id);
+            return result;
+        }else if(status_code == 2){
+            json result = {{"error", 6},{"error_msg", "cant find any files to test"}};
             remove_container(container_id);
             return result;
         }else{  

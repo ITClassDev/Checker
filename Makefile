@@ -14,19 +14,19 @@ all: $(EXE)
 $(EXE): $(OBJS) $(MAIN)
 	$(CXX) -o $@ $(MAIN) $(OBJS) $(CXXFLAGS) $(LIBS)
 
-$(OBJ_DIR)checker.o : checker.cpp obj_dir
+$(OBJ_DIR)checker.o : checker.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-$(OBJ_DIR)docker.o : docker.cpp obj_dir
+$(OBJ_DIR)docker.o : docker.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-$(OBJ_DIR)generator.o : generator.cpp obj_dir
+$(OBJ_DIR)generator.o : generator.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-$(OBJ_DIR)utils.o : utils.cpp obj_dir
+$(OBJ_DIR)utils.o : utils.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-obj_dir :
+build :
 	mkdir $(OBJ_DIR)
 
 clean:

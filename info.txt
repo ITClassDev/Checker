@@ -150,6 +150,7 @@ structure specifications:
   3 - github repository is private or does not exist
   4 - cant load config
   5 - nothing, just something went wrong
+  6 - cant find any files to test
 
   error_msg: if internal error occurre, than error_msg field appears and give more info
   submit_id: submit id passed at test json
