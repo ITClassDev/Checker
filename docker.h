@@ -4,11 +4,6 @@
 
 #include "common.h"
 
-namespace http = boost::beast::http;
-namespace websocket = boost::beast::websocket;
-namespace net = boost::asio;
-
-using tcp = boost::asio::ip::tcp;
 using namespace std;
 
 
@@ -30,9 +25,6 @@ json exec_in_container(string id, string bash_command, bool bash=true, bool Atta
 string get_container_logs(string id, bool stream_stdout=true, bool stream_stderr=false, string host="http://localhost/v1.41");
 json wait_for_container(string id, string host="http://localhost/v1.41");
 json remove_container(string id, string host="http://localhost/v1.41");
-
-// Bad working
-websocket::stream<tcp::socket> attach_to_container_ws(string id, bool stream=true, bool stdout=false, bool stdin=false, bool logs=false, string host="127.0.0.1", string port="2375");
 
 
 #endif

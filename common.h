@@ -14,9 +14,6 @@
 #include <regex>
 
 #include <curl/curl.h>
-#include <boost/beast/websocket.hpp>
-#include <boost/asio/connect.hpp>
-#include <boost/asio/ip/tcp.hpp>
 
 #define TEST_TIME_LIMIT  1
 #define TEST_MEM_LIMIT   6

@@ -17,7 +17,7 @@ int main(int argc, char *argv[]){
 
     // challenge tests
     CROW_ROUTE(app, "/challenge").methods("POST"_method)([](const crow::request &req){
-        // prepare jsons
+		// prepare jsons
         json input_json = json::parse(req.body);
         json result_json;
 

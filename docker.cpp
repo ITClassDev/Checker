@@ -152,20 +152,6 @@ json create_container(string image, int StopTimeout, json volumes, int MemoryLim
     string endpoint = host + "/containers/create";
     return raw_api(endpoint, 1, payload_string);
 }
-websocket::stream<tcp::socket> attach_to_container_ws(string id, bool stream, bool stdout, bool stdin, bool logs, string host, string port){
-    // Create websocket
-    net::io_context ioc;
-    tcp::resolver resolver{ioc};
-    websocket::stream<tcp::socket> ws{ioc};
-    auto const results = resolver.resolve(host, port);
-    net::connect(ws.next_layer(), results.begin(), results.end());
-    
-    string connection_uri = "/containers/" + id + "/attach/ws?stream=" + to_string(stream) + "&stdout=" + to_string(stdout) + \
-                             "&stdin=" + to_string(stdin) + "&logs=" + to_string(logs);
-    printf("\n%s\n", connection_uri.c_str());
-    ws.handshake(host, connection_uri);
-    return ws;
-}
 
 string get_container_logs(string id, bool stream_stdout, bool stream_stderr, string host){
     string endpoint = host + "/containers/" + id + "/logs?stdout=" + to_string(stream_stdout) + "&stderr=" + to_string(stream_stderr);

@@ -96,7 +96,7 @@ structure:
 
 structure specifications:
   file_path: only absolute local path to .cpp or .py file
-  language: for now lanuage can be only python or cpp
+  language: for now lanuage can be only "python" or "cpp"
   debug: adds to results debug field, that contain output and expected output
   submit_id: can be any value you like        
   

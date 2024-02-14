@@ -99,7 +99,11 @@ int Workspace::prepareWorkspace(json input_json){
     // copy main file from challenge to created dir
     if(!std::filesystem::is_directory(tmp_folder_path)){
         std::string submission_id = tests["submit_id"];
-        std::filesystem::copy(tmp_folder_path, (workspace_path + submission_id + "/main.cpp").c_str());
+        if(language == "cpp"){
+            std::filesystem::copy(tmp_folder_path, (workspace_path + submission_id + "/main.cpp").c_str());
+        }else if(language == "python"){ 
+            std::filesystem::copy(tmp_folder_path, (workspace_path + submission_id + "/main.py").c_str());
+        }
     }
     // copy files from github to created dirs
     else{
