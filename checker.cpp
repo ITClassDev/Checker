@@ -358,7 +358,7 @@ json PythonChecker::testMain(json tests, bool debug){
         }else if(status_code == 1){
             // if python raise exception in code (error = 1 because its like a compilation error)
             std::string output = get_container_logs(container_id);
-            std::string comp_error = output.substr(output.find("Traceback"));
+            std::string comp_error = output;
             // remove submission path from error
             comp_error = regex_replace(comp_error, regex("\\r\\n"), "\n");
             comp_error = regex_replace(comp_error, regex("/home/code/" + submission_id + "/"), "");

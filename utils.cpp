@@ -185,7 +185,7 @@ std::string Workspace::cleanWorkspace(std::string last_clean_time){
 
     // get last and now time_t
     time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    struct tm time_tmp;
+    std::tm time_tmp{};
     strptime(last_clean_time.c_str(), "%Y.%m.%d %H:%M:%S", &time_tmp);
     time_t last = mktime(&time_tmp);
 
@@ -195,6 +195,7 @@ std::string Workspace::cleanWorkspace(std::string last_clean_time){
         char now_time_str[25];
         std::strftime(now_time_str, sizeof(now_time_str), "%Y.%m.%d %H:%M:%S", localtime(&now));
         new_time = now_time_str;
+        
         // delete all files in workspace
         system(("rm -rf " + workspace_path + "* 2> /dev/null").c_str());
     }
