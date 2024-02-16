@@ -1,1 +1,0 @@
-print(abs(int(input())))
